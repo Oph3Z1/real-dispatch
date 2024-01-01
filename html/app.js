@@ -11,86 +11,10 @@ const app = Vue.createApp({
             {id: 1, crime: 'Shooting!', time: '10:28 AM', info: {location: 'Alta Street', gender: 'Male', weapon: 'Pistol', vehiclestatus: 'On foot', plate: 'None', vehiclecolor: 'None'}, claimed: true},
             {id: 2, crime: 'Shooting!', time: '10:32 AM', info: {location: 'Capital Boulevard', gender: 'Female', weapon: 'AK-47', vehiclestatus: 'Sultan RS', plate: 'ABC3122', vehiclecolor: 'Red'}, claimed: false}
         ],
-        MAP_LIST: {},
         SelectedDispatch: null,
     }),
 
     methods: {
-        CreateMAP(key, id) {
-            const CUSTOM_CRS = L.extend({}, L.CRS.Simple, {
-                projection: L.Projection.LonLat,
-                scale: function(zoom) { 
-                    return Math.pow(1, zoom - 4);
-                },
-                zoom: function(sc) {
-                    return Math.log(sc) / 0.6931471805599453;
-                },
-                transformation: new L.Transformation(0.02072, 117.3, -0.0205, 172.8),
-                infinite: false
-            });
-            
-            this.MAP_LIST[key] = L.map(id, {
-                crs: CUSTOM_CRS,
-                minZoom: 3,
-                maxZoom: 7,
-                noWrap: false,
-                continuousWorld: false,
-                preferCanvas: true,
-            
-                center: [0, -1024],
-                zoom: 4,
-            });  
-            
-            const MAP = this.MAP_LIST[key];
-
-            const MAP_IMAGE = 'https://gta-assets.nopixel.net/images/dispatch-map.png';
-            const SW = MAP.unproject([0, 1024], 3 - 1);
-            const NE = MAP.unproject([1024, 0], 3 - 1);
-            const MAP_BOUNDS = new L.LatLngBounds(SW, NE);
-            MAP.setMaxBounds(MAP_BOUNDS);            
-
-            MAP.attributionControl.setPrefix(false)
-
-            L.imageOverlay(MAP_IMAGE, MAP_BOUNDS).addTo(MAP);
-
-            MAP.on('drag', function() {
-                MAP.panInsideBounds(MAP_BOUNDS, { animate: false });
-            });
-        },
-
-        // DispatchMAP(DISPATCH) {
-        //     const MIN = Math.round(Math.round((new Date() - new Date(DISPATCH.time)) / 1000) / 60);
-        //     if (MIN > 10)
-        //         return;
-
-        //     Object.keys(this.MAP_LIST).forEach(key => {
-        //         const value = this.MAP_LIST[key];
-
-        //         const COORDS_X = DISPATCH.origin.x;
-        //         const COORDS_Y = DISPATCH.origin.y;
-        //         const CODE = DISPATCH.callId;
-
-        //         const ICON_TYPE = this.DispatchPing;
-
-        //         this.Dispatches[CODE] = L.marker([COORDS_Y, COORDS_X], { icon: ICON_TYPE });
-
-        //         this.Dispatches[CODE].bindTooltip(`<div class="map-tooltip-info">${DISPATCH.dispatchMessage}</div><div class="map-tooltip-resp"><b>${Object.keys(DISPATCH.units).length}</b> units responding.</div><div class="map-tooltip-id">#${DISPATCH.callId}</div>`, {
-        //             direction: 'top',
-        //             permanent: false,
-        //             offset: [0, -10],
-        //             opacity: 1,
-        //             interactive: true,
-        //             className: 'map-tooltip'
-        //         });
-
-        //         this.Dispatches[CODE].addTo(value);
-        //     });
-        // },
-
-        // ClearMap() {
-        //     $(".leaflet-popup-pane").empty();
-        //     $(".leaflet-marker-pane").empty();
-        // }   
 
         DisableScroll() {
             window.addEventListener("wheel", this.preventScroll, { passive: false });
@@ -113,29 +37,74 @@ const app = Vue.createApp({
         window.removeEventListener('keyup', this.onKeyUp);
     },
 
-    mounted() {
-        this.CreateMAP("small", this.$refs.smallMap);
+    mounted() {  
+        const center_x = 117.3;
+        const center_y = 172.8;
+        const scale_x = 0.02072;
+        const scale_y = 0.0205;
 
-        setTimeout(() => {
-            const map = this.MAP_LIST["small"];
-            const bounds = map.getBounds();
-            map.fitBounds(bounds, { animate: false });        
-        }, 100);        
-        
-        window.addEventListener("message", event => {
-            window.addEventListener('keyup', this.onKeyUp);
-            switch (event.data.message) {
-                case "OPEN":
-                    this.Show = true
-                break;
-                
-                case "CLOSE":
-                    this.Show = false
-                break;
-            }   
+        CUSTOM_CRS = L.extend({}, L.CRS.Simple, {
+            projection: L.Projection.LonLat,
+            scale: function(zoom) {
+
+                return Math.pow(2, zoom);
+            },
+            zoom: function(sc) {
+
+                return Math.log(sc) / 0.6931471805599453;
+            },
+            distance: function(pos1, pos2) {
+                var x_difference = pos2.lng - pos1.lng;
+                var y_difference = pos2.lat - pos1.lat;
+                return Math.sqrt(x_difference * x_difference + y_difference * y_difference);
+            },
+            transformation: new L.Transformation(scale_x, center_x, -scale_y, center_y),
+            infinite: true
         });
-    },
-    
+
+        var AtlasStyle	= L.tileLayer('mapStyles/styleAtlas/{z}/{x}/{y}.jpg', {minZoom: 0,maxZoom: 5,noWrap: true,continuousWorld: false,id: 'styleAtlas map',});
+
+        var ExampleGroup = L.layerGroup();
+
+        var Icons = {
+            "Example": ExampleGroup,
+        };
+
+        var mymap = L.map('map', {
+            crs: CUSTOM_CRS,
+            minZoom: 2,
+            maxZoom: 5,
+            Zoom: 5,
+            maxNativeZoom: 5,
+            preferCanvas: true,
+            layers: [AtlasStyle],
+            center: [0, 0],
+            zoom: 3,
+        });
+
+        function customIcon(icon){
+            return L.icon({
+                iconUrl: `img/police.png`,
+                iconSize:     [35, 35],
+                iconAnchor:   [20, 20], 
+                popupAnchor:  [-10, -27]
+            });
+        }
+
+        var X  = 0;
+        var Y = 0;
+        ExampleGroup.clearLayers();
+
+        L.marker([Y, X], { icon: customIcon() }).bindPopup("I am here.").addTo(mymap);
+
+        window.addEventListener("message", event => {
+            const data = event.data;
+            
+            if (data.action == 'albakim') {
+                this.Show = true
+            }
+        });
+    },      
 });
 
 app.use(store).mount("#app");

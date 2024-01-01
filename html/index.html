@@ -4,21 +4,137 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>real-dispatch</title>
-    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/vue@next"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/vuex@4.0.0/dist/vuex.global.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.3.15/dist/vuetify.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@3.3.15/dist/vuetify.min.css">
+    <script src="https://cdn.tailwindcss.com"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.3.15/dist/vuetify.min.js"></script> 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@3.3.15/dist/vuetify.min.css"> 
+    <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="">
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
 </head>
+<style>
+    #app {
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        position: absolute;  
+    }
+
+    #map {
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+        position: absolute;  
+    }
+    
+    @font-face {
+        font-family: regular;
+        src: url('./fonts/Gilroy-ExtraBold.otf');
+    }
+
+    @font-face {
+    font-family: regularlight;
+    src: url('./fonts/Gilroy-Light.otf');
+    }
+
+    /* *{
+    overflow: hidden;
+    } */
+
+    html {
+        user-select: none;  
+    }
+    
+    body {
+        overflow: hidden;
+    }
+
+    ::-webkit-scrollbar {
+        width: 0vw;
+        background: transparent;
+    }
+
+    .header-text {
+        color: #FFF;
+        font-family: regular;
+        font-size: 2.7083vw;
+        font-style: normal;
+        font-weight: 700;
+        line-height: normal;
+        text-transform: uppercase;
+        }
+
+    .connect-to-dashcam-text {
+        color: #C5C6C7;
+        text-align: center;
+        font-family: regularlight;
+        font-size: .8333vw;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        text-transform: uppercase;
+    }
+
+    .crime-text {
+        color: #C6C6C8;
+        font-family: regularlight;
+        font-size: .9375vw;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+    }
+
+    .crime-status-text {
+        color: #FFF;
+        text-align: right;
+        font-family: regularlight;
+        font-size: 1.0417vw;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        right: 1vw;
+        position: absolute;
+    }
+
+    .crime-info-text {
+        color: #FFF;
+        font-family: regularlight;
+        font-size: .7292vw;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+    }
+
+    .time-text {
+        color: #C6C6C8;
+        text-align: right;
+        font-family: regularlight;
+        font-size: .7292vw;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+    }
+
+    .select-text {
+        color: #C7C7C8;
+        font-family: regularlight;
+        font-size: .7292vw;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+    }
+</style>
 <body>
     <div id="app">
-        <div class="w-full h-[100vh]">
-            <div class="w-full h-full flex flex-col" style="background-image: url('./img/background.png'); background-size: 100% 100%;">
-                <div class="w-full h-[10%]"></div>
-                <div class="w-full h-[4%] flex flex-wrap">
+        <div class="w-full h-[100vh] left-0 top-0 absolute">
+            <div v-if="Show" class="w-full h-full flex flex-col left-0 top-0 absolute" style="background-image: url('./img/background.png'); background-size: 100% 100%;">
+                <div class="w-full h-[10%] top-0 left-0 absolute"></div>
+                <div class="w-full h-[4%] flex flex-wrap top-[10%] left-0 absolute">
                     <div class="w-[50%] h-full flex items-center justify-center">
                         <span class="header-text">LSPD DISPATCH SYSTEM</span>
                     </div>
@@ -30,12 +146,12 @@
                             <img src="./img/x.png" style="width: .5751vw; height: .5751vw;">
                         </div>
                     </div>
-                </div> 
-                <div class="w-full h-[10%]"></div>
-                <div class="w-full h-[55%] left-0 top-[24%] flex flex-wrap absolute">
+                </div>
+                <div class="w-full h-[10%] top-[14%] left-0 absolute"></div>
+                <div class="w-full h-[55%] flex flex-wrap left-0 top-[24%] absolute">
                     <div class="w-[10.1%] h-full left-0 top-0 absolute"></div>
                     <div class="w-[54.9%] h-full flex items-center justify-start top-0 left-[10.1%] absolute">
-                        <div class="w-full h-full left-0 top-0 absolute" ref="smallMap" style="scale: 1.3;" @mouseover="DisableScroll" @mouseout="EnableScroll"></div>
+                        <div id="map"></div>
                     </div>
                     <div class="w-[3.8%] h-full left-[65%] top-0 absolute"></div>
                     <div class="w-[20%] h-full block right-[11.15%] top-0 overflow-y-auto overflow-x-hidden absolute">
@@ -93,6 +209,6 @@
             </div>
         </div>
     </div>
-    <script src="./app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
