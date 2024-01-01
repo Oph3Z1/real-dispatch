@@ -1,0 +1,47 @@
+@font-face {
+    font-family: regular;
+    src: url('./fonts/Gilroy-ExtraBold.otf');
+}
+
+@font-face {
+    font-family: regularlight;
+    src: url('./fonts/Gilroy-Light.otf');
+}
+
+*{
+  overflow: hidden;
+}
+
+html {
+  user-select: none;  
+}
+  
+body {
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 0vw;
+  background: transparent;
+}
+
+.header-text {
+    color: #FFF;
+    font-family: regular;
+    font-size: 52px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    text-transform: uppercase;
+}
+
+.connect-to-dashcam-text {
+    color: #C5C6C7;
+    text-align: center;
+    font-family: regularlight;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    text-transform: uppercase;
+}

@@ -11,8 +11,39 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@3.3.15/dist/vuetify.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@3.3.15/dist/vuetify.min.css">
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
 </head>
 <body>
-    
+    <div id="app">
+        <div class="w-full h-[100vh]">
+            <div class="w-full h-full flex flex-col" style="background-image: url('./img/background.png'); background-size: 100% 100%;">
+                <div class="w-full h-[10%]"></div>
+                <div class="w-full h-[4%] flex flex-wrap">
+                    <div class="w-[50%] h-full flex items-center justify-center">
+                        <span class="header-text">LSPD DISPATCH SYSTEM</span>
+                    </div>
+                    <div class="w-[50%] h-full flex items-center justify-end">
+                        <div class="w-[40%] h-[80%] flex items-center justify-center bg-[#181A21] border-[#333334] border-[.1vw] hover:cursor-pointer">
+                            <span class="connect-to-dashcam-text">Connect</span>
+                        </div>
+                        <div class="w-[4.5%] h-[80%] flex items-center justify-center bg-[#141416] mr-[3vw] ml-[6vw] border-[#333334] border-[.1vw] hover:cursor-pointer">
+                            <img src="./img/x.png" style="width: .5751vw; height: .5751vw;">
+                        </div>
+                    </div>
+                </div> 
+                <div class="w-full h-[10%]"></div>
+                <div class="w-full h-[55%] left-0 top-[24%] flex flex-wrap absolute">
+                    <div class="w-[10.1%] h-full left-0 top-0 absolute"></div>
+                    <div class="w-[54.9%] h-full flex items-center justify-start top-0 left-[10.1%] absolute">
+                        <div class="w-full h-full left-0 top-0 absolute" ref="smallMap"></div>
+                    </div>
+                    <div class="w-[3.8%] h-full left-[65%] top-0 absolute"></div>
+                    <div class="w-[20%] h-full border right-[11.15%] top-0 absolute"></div>
+                    <div class="w-[11.2%] h-full right-0 top-0 absolute"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./app.js"></script>
 </body>
 </html>
