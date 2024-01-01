@@ -7,8 +7,12 @@ const store = Vuex.createStore({
 const app = Vue.createApp({
     data: () => ({
         Show: true,
-        Dispatches: {},
+        Dispatches: [
+            {id: 1, crime: 'Shooting!', time: '10:28 AM', info: {location: 'Alta Street', gender: 'Male', weapon: 'Pistol', vehiclestatus: 'On foot', plate: 'None', vehiclecolor: 'None'}, claimed: true},
+            {id: 2, crime: 'Shooting!', time: '10:32 AM', info: {location: 'Capital Boulevard', gender: 'Female', weapon: 'AK-47', vehiclestatus: 'Sultan RS', plate: 'ABC3122', vehiclecolor: 'Red'}, claimed: false}
+        ],
         MAP_LIST: {},
+        SelectedDispatch: null,
     }),
 
     methods: {
@@ -19,12 +23,7 @@ const app = Vue.createApp({
                     return Math.pow(1, zoom - 4);
                 },
                 zoom: function(sc) {
-                    return Math.log(sc) / 1;
-                },
-                distance: function(pos1, pos2) {
-                    const x_difference = pos2.lng - pos1.lng;
-                    const y_difference = pos2.lat - pos1.lat;
-                    return Math.sqrt(x_difference * x_difference + y_difference * y_difference);
+                    return Math.log(sc) / 0.6931471805599453;
                 },
                 transformation: new L.Transformation(0.02072, 117.3, -0.0205, 172.8),
                 infinite: false
@@ -32,9 +31,9 @@ const app = Vue.createApp({
             
             this.MAP_LIST[key] = L.map(id, {
                 crs: CUSTOM_CRS,
-                
-            
-                noWrap: true,
+                minZoom: 3,
+                maxZoom: 7,
+                noWrap: false,
                 continuousWorld: false,
                 preferCanvas: true,
             
@@ -92,6 +91,14 @@ const app = Vue.createApp({
         //     $(".leaflet-popup-pane").empty();
         //     $(".leaflet-marker-pane").empty();
         // }   
+
+        DisableScroll() {
+            window.addEventListener("wheel", this.preventScroll, { passive: false });
+        },
+
+        EnableScroll() {
+            window.removeEventListener("wheel", this.preventScroll);
+        },
     },
 
     computed: {

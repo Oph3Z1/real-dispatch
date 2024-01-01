@@ -1,11 +1,11 @@
 @font-face {
-    font-family: regular;
-    src: url('./fonts/Gilroy-ExtraBold.otf');
+  font-family: regular;
+  src: url('./fonts/Gilroy-ExtraBold.otf');
 }
 
 @font-face {
-    font-family: regularlight;
-    src: url('./fonts/Gilroy-Light.otf');
+  font-family: regularlight;
+  src: url('./fonts/Gilroy-Light.otf');
 }
 
 *{
@@ -26,22 +26,71 @@ body {
 }
 
 .header-text {
-    color: #FFF;
-    font-family: regular;
-    font-size: 52px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: normal;
-    text-transform: uppercase;
+  color: #FFF;
+  font-family: regular;
+  font-size: 2.7083vw;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  text-transform: uppercase;
 }
 
 .connect-to-dashcam-text {
-    color: #C5C6C7;
-    text-align: center;
-    font-family: regularlight;
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: normal;
-    text-transform: uppercase;
+  color: #C5C6C7;
+  text-align: center;
+  font-family: regularlight;
+  font-size: .8333vw;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  text-transform: uppercase;
+}
+
+.crime-text {
+  color: #C6C6C8;
+  font-family: regularlight;
+  font-size: .9375vw;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.crime-status-text {
+  color: #FFF;
+  text-align: right;
+  font-family: regularlight;
+  font-size: 1.0417vw;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  right: 1vw;
+  position: absolute;
+}
+
+.crime-info-text {
+  color: #FFF;
+  font-family: regularlight;
+  font-size: .7292vw;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.time-text {
+  color: #C6C6C8;
+  text-align: right;
+  font-family: regularlight;
+  font-size: .7292vw;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.select-text {
+  color: #C7C7C8;
+  font-family: regularlight;
+  font-size: .7292vw;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
 }

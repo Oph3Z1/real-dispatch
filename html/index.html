@@ -35,10 +35,59 @@
                 <div class="w-full h-[55%] left-0 top-[24%] flex flex-wrap absolute">
                     <div class="w-[10.1%] h-full left-0 top-0 absolute"></div>
                     <div class="w-[54.9%] h-full flex items-center justify-start top-0 left-[10.1%] absolute">
-                        <div class="w-full h-full left-0 top-0 absolute" ref="smallMap"></div>
+                        <div class="w-full h-full left-0 top-0 absolute" ref="smallMap" style="scale: 1.3;" @mouseover="DisableScroll" @mouseout="EnableScroll"></div>
                     </div>
                     <div class="w-[3.8%] h-full left-[65%] top-0 absolute"></div>
-                    <div class="w-[20%] h-full border right-[11.15%] top-0 absolute"></div>
+                    <div class="w-[20%] h-full block right-[11.15%] top-0 overflow-y-auto overflow-x-hidden absolute">
+                        <div class="w-full h-[8%] flex flex-col bg-[#16181D] mb-[.8vw]" v-for="(v, k) in Dispatches" @click="SelectedDispatch = k" :style="{ height: SelectedDispatch == k ? '23%' : '8%' }" :class="{ 'border-t-[#FFF]': v.claimed, 'border-t-[.2vw]': v.claimed, 'border-[#2D2F34]': !v.claimed, 'border-[.1vw]': !v.claimed, 'hover:cursor-pointer': SelectedDispatch != k }">
+                            <div class="w-full flex items-center justify-start" :class="{'h-[33.3333333%]': SelectedDispatch == k, 'h-full': SelectedDispatch != k}">
+                                <span class="crime-text" style="margin-left: 1vw;">22-30</span>
+                                <span class="crime-text" style="margin-left: 1vw;">{{ v.crime }}</span>
+                                <span class="crime-status-text" v-if="SelectedDispatch != k">New</span>
+                            </div>
+                            <div class="w-full h-[66.6666667%] flex flex-wrap" v-if="SelectedDispatch == k">
+                                <div class="w-[33.3333333%] h-full flex flex-col">
+                                    <div class="w-[80%] h-[30%] flex items-center justify-start ml-[1.1vw]">
+                                        <img src="./img/location.png" class="mr-[.2vw]">
+                                        <span style="color: #FFF; font-family: regular; font-size: .7292vw; font-style: normal; font-weight: 500; line-height: normal; margin-right: .3vw;">-</span>
+                                        <span class="crime-info-text">{{ v.info.location }}</span>
+                                    </div>
+                                    <div class="w-[90%] h-[30%] flex items-center justify-start ml-[1.1vw]">
+                                        <img src="./img/gender.png" class="mr-[.2vw]">
+                                        <span style="color: #FFF; font-family: regular; font-size: .7292vw; font-style: normal; font-weight: 500; line-height: normal; margin-right: .3vw;">-</span>
+                                        <span class="crime-info-text">{{ v.info.gender }}</span>
+                                    </div>
+                                    <div class="w-[90%] h-[30%] flex items-center justify-start ml-[1.1vw]">
+                                        <img src="./img/pistol.png" class="mr-[.2vw]">
+                                        <span style="color: #FFF; font-family: regular; font-size: .7292vw; font-style: normal; font-weight: 500; line-height: normal; margin-right: .3vw;">-</span>
+                                        <span class="crime-info-text">{{ v.info.weapon }}</span>
+                                    </div>
+                                </div>
+                                <div class="w-[33.3333333%] h-full flex flex-col ml-[.5vw]">
+                                    <div class="w-[80%] h-[30%] flex items-center justify-start ml-[1.1vw]">
+                                        <img src="./img/car.png" class="mr-[.2vw]">
+                                        <span style="color: #FFF; font-family: regular; font-size: .7292vw; font-style: normal; font-weight: 500; line-height: normal; margin-right: .3vw;">-</span>
+                                        <span class="crime-info-text">{{ v.info.vehiclestatus }}</span>
+                                    </div>
+                                    <div class="w-[90%] h-[30%] flex items-center justify-start ml-[1.1vw]">
+                                        <img src="./img/plate.png" class="mr-[.2vw]">
+                                        <span style="color: #FFF; font-family: regular; font-size: .7292vw; font-style: normal; font-weight: 500; line-height: normal; margin-right: .3vw;">-</span>
+                                        <span class="crime-info-text">{{ v.info.plate }}</span>
+                                    </div>
+                                    <div class="w-[90%] h-[30%] flex items-center justify-start ml-[1.1vw]">
+                                        <img src="./img/color.png" class="mr-[.2vw]">
+                                        <span style="color: #FFF; font-family: regular; font-size: .7292vw; font-style: normal; font-weight: 500; line-height: normal; margin-right: .3vw;">-</span>
+                                        <span class="crime-info-text">{{ v.info.vehiclecolor }}</span>
+                                    </div>
+                                </div>
+                                <div class="w-[30%] h-full flex flex-col items-center justify-center">
+                                    <span class="time-text ml-[1.3vw]">13:82 AM</span>
+                                    <div class="w-[70%] h-[35%] flex items-center justify-center bg-[#202124] border-[.1vw] border-[#3D3E40] hover:cursor-pointer my-[.7vw]" v-if="!v.claimed"> <span class="select-text">Select</span> </div>
+                                    <div class="w-[70%] h-[35%] flex items-center justify-center bg-[#202124] border-[.1vw] border-[#3D3E40] my-[.7vw]" v-if="v.claimed"> <span class="select-text">Claimed</span> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="w-[11.2%] h-full right-0 top-0 absolute"></div>
                 </div>
             </div>
