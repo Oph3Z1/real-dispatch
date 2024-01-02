@@ -1,76 +1,31 @@
 frameworkObject = false
 PlayerJob = ""
+policetable = {}
 
 Citizen.CreateThread(function()
     frameworkObject, Config.Framework = GetCore()
 end)
 
-RegisterCommand('addMarker', function()
-    local playerCoords = GetEntityCoords(PlayerPedId())
-    local processedData = {
-        {id = 1, x = playerCoords.x, y = playerCoords.y }
-    }
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
+    local Player = frameworkObject.Functions.GetPlayerData()
+    local name = Player.charinfo.firstname .. ' ' .. Player.charinfo.lastname
+    local coords = GetEntityCoords(PlayerPedId())
+    local job = Player.job.name
 
-    -- for k, v in pairs(data) do
-    --     local GetPlayers = GetPlayerFromServerId(v.id)
-    --     local PlayerPeds = GetPlayerPed(GetPlayers)
-    --     local GetCoords = GetEntityCoords(PlayerPeds)
-    --     table.insert(processedData, {
-    --         id = k,
-    --         x = GetCoords.x,
-    --         y = GetCoords.y
-    --     })
-    -- end
+    TriggerServerEvent('real-dispatch:GetPolices', job, name, coords)
+    print("OK")
+end)
+
+RegisterNetEvent('real-dispatch:GetPoliceTable', function(table)
+    policetable = table
+    print(json.encode(policetable))
+end)
+
+RegisterCommand('addMarker', function()
+    print(json.encode(policetable))
     SendNUIMessage({
         action = "OpenUI",
-        data = processedData
+        data = policetable
     })
     SetNuiFocus(true, true)
 end)
-
-
-RegisterCommand('opend', function()
-    TriggerServerEvent('real-dispatch:GetPolices')
-end)
-
-RegisterNetEvent('real-dispatch:GotPolices')
-AddEventHandler('real-dispatch:GotPolices', function(data)
-    local processedData = {}
-
-    for k, v in pairs(data) do
-        local GetPlayers = GetPlayerFromServerId(v.id)
-        local PlayerPeds = GetPlayerPed(GetPlayers)
-        local GetCoords = GetEntityCoords(PlayerPeds)
-        table.insert(processedData, {
-            id = v.id,
-            playername = v.playername,
-            playerx = GetCoords.x,
-            playery = GetCoords.y
-        })
-    end
-
-    SendNUIMessage({
-        action = 'OpenUI',
-        data = processedData
-    })
-    SetNuiFocus(true, true)
-end)
-
-
--- Citizen.CreateThread(function()
---     while true do
---         local Player = PlayerPedId()
---         local veh = GetVehiclePedIsIn(Player, false)
---         local Coords = GetEntityCoords(Player)
---         local Heading = GetEntityHeading(PlayerPedId())
-
---         SendNUIMessage({
---             action = 'UpdateLoc',
---             x = Coords.x,
---             y = Coords.y,
---             heading = Heading,
---         })
-
---         Citizen.Wait(1000)
---     end
--- end)

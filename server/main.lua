@@ -1,25 +1,25 @@
 frameworkObject = nil
+local Polices = {}
 
 Citizen.CreateThread(function()
     frameworkObject, Config.Framework = GetCore()
 end)
 
 RegisterNetEvent('real-dispatch:GetPolices')
-AddEventHandler('real-dispatch:GetPolices', function()
+AddEventHandler('real-dispatch:GetPolices', function(job, name, coords)
+    local source = source
+
     if Config.Framework == 'newqb' or Config.Framework == 'oldqb' then
-        local AllPlayers = frameworkObject.Functions.GetPlayers()
-        local PlayersTable = {}
-        for k, v in pairs(AllPlayers) do
-            frameworkObject.Debug(AllPlayers)
-            local Player = frameworkObject.Functions.GetPlayer(v)
-            if Player.PlayerData.job.name == 'police' then
-                table.insert(PlayersTable, {
-                    id = v,
-                    playername = Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname
-                })
-            end
+        local Player = frameworkObject.Functions.GetPlayer(source)
+        if Player.PlayerData.job.name == job then
+            table.insert(Polices, {
+                id = source,
+                name = name,
+                coords = coords
+            })
+            print(json.encode(Polices))
+            TriggerClientEvent('real-dispatch:GetPoliceTable', -1, Polices)
         end
-        TriggerClientEvent('real-dispatch:GotPolices', source, PlayersTable)
     else
     end
 end)
