@@ -6,16 +6,119 @@ const store = Vuex.createStore({
 
 const app = Vue.createApp({
     data: () => ({
-        Show: true,
+        Show: false,
         Dispatches: [
             {id: 1, crime: 'Shooting!', time: '10:28 AM', info: {location: 'Alta Street', gender: 'Male', weapon: 'Pistol', vehiclestatus: 'On foot', plate: 'None', vehiclecolor: 'None'}, claimed: true},
             {id: 2, crime: 'Shooting!', time: '10:32 AM', info: {location: 'Capital Boulevard', gender: 'Female', weapon: 'AK-47', vehiclestatus: 'Sultan RS', plate: 'ABC3122', vehiclecolor: 'Red'}, claimed: false}
         ],
+        players: {},
         SelectedDispatch: null,
+        map: null,
+        mapMarkers: null, 
+        dispatchPing: null
     }),
 
     methods: {    
-        
+        dispatchMap(playersData) {
+            playersData.forEach(playerInfo => {
+                const playerId = playerInfo.id;
+                const playerCoords = { x: playerInfo.x, y: playerInfo.y };
+    
+                // Oyuncu zaten varsa, mevcut marker'ı güncelle
+                if (this.players[playerId]) {
+                    const existingMarker = this.players[playerId].marker;
+                    existingMarker.setLatLng([playerCoords.y, playerCoords.x]);
+                    return;
+                }
+    
+                // Yeni bir marker oluştur ve haritaya ekle
+                const newMarker = L.marker([playerCoords.y, playerCoords.x], { icon: this.dispatchPing });
+                newMarker.addTo(this.map);
+    
+                // Oyuncu bilgilerini table'a ekle
+                this.players[playerId] = { coords: playerCoords, marker: newMarker };
+    
+    
+                // Tooltip ayarla
+                newMarker.bindTooltip(`<div class="map-tooltip-info">Oyuncu #${playerId}</div>`, {
+                    direction: 'top',
+                    permanent: false,
+                    offset: [0, -10],
+                    opacity: 1,
+                    interactive: true,
+                    className: 'map-tooltip'
+                });
+    
+                // Marker'a tıklama olayını ekle
+                newMarker.on('click', () => {
+                    // Oyuncuya tıklanınca yapılacak işlemleri buraya ekleyebilirsiniz
+                    // Örneğin, bir HTTP isteği gönderme gibi
+                });
+            });
+        },
+
+        clearMap() {
+            this.$refs.mapClear.innerHTML = '<span class="fas fa-spinner fa-spin"></span>';
+            setTimeout(() => {
+                this.$refs.mapClear.innerHTML = 'Clear';
+            }, 1500);
+        },
+
+        CreateMap() {
+            const customcrs = L.extend({}, L.CRS.Simple, {
+                projection: L.Projection.LonLat,
+                scale: zoom => Math.pow(2, zoom),
+                zoom: sc => Math.log(sc) / 0.6931471805599453,
+                distance: (pos1, pos2) => {
+                    const x_difference = pos2.lng - pos1.lng;
+                    const y_difference = pos2.lat - pos1.lat;
+                    return Math.sqrt(x_difference * x_difference + y_difference * y_difference);
+                },
+                transformation: new L.Transformation(0.02072, 117.3, -0.0205, 172.8),
+                infinite: false,
+            });
+    
+            this.map = L.map("map-item", {
+                crs: customcrs,
+                minZoom: 3,
+                maxZoom: 5,
+                zoom: 5,
+                noWrap: true,
+                continuousWorld: false,
+                preferCanvas: true,
+                center: [0, -1024],
+                maxBoundsViscosity: 1.0
+            });
+    
+            const customImageUrl = 'https://gta-assets.nopixel.net/images/dispatch-map.png';
+            const sw = this.map.unproject([0, 1024], 3 - 1);
+            const ne = this.map.unproject([1024, 0], 3 - 1);
+            const mapbounds = new L.LatLngBounds(sw, ne);
+    
+            this.map.setView([-300, -1500], 4);
+            this.map.setMaxBounds(mapbounds);
+    
+            L.imageOverlay(customImageUrl, mapbounds).addTo(this.map);
+    
+            this.map.attributionControl.setPrefix(false);
+    
+            this.map.on('dragend', () => {
+                if (!mapbounds.contains(this.map.getCenter())) {
+                    this.map.panTo(mapbounds.getCenter(), { animate: false });
+                }
+            });
+    
+            // Leaflet icon ve layerGroup ayarları
+            this.dispatchPing = L.divIcon({
+                html: '<img src="img/police.png" class="map-icon" />',
+                iconSize: [20, 20],
+                className: 'map-icon-ping',
+                iconAnchor: [10, 20]
+            });
+    
+            this.mapMarkers = L.layerGroup();
+            this.map.addLayer(this.mapMarkers);
+        },
     },
 
     computed: {
@@ -35,6 +138,12 @@ const app = Vue.createApp({
             const data = event.data;
             
             if (data.action == 'OpenUI') {
+                this.Show = true
+
+                setTimeout(() => {
+                    this.CreateMap()
+                    this.dispatchMap(data.data)
+                }, 10)
             }
 
             if (data.action == 'UpdateLoc') {
@@ -66,124 +175,3 @@ window.postNUI = async (name, data) => {
         // console.log(error)
     }
 };
-
-customcrs = L.extend({}, L.CRS.Simple, {
-    projection: L.Projection.LonLat,
-    scale: function(zoom) {
-  
-        return Math.pow(2, zoom);
-    },
-    zoom: function(sc) {
-  
-        return Math.log(sc) / 0.6931471805599453;
-    },
-    distance: function(pos1, pos2) {
-        var x_difference = pos2.lng - pos1.lng;
-        var y_difference = pos2.lat - pos1.lat;
-        return Math.sqrt(x_difference * x_difference + y_difference * y_difference);
-    },
-    transformation: new L.Transformation(0.02072, 117.3, -0.0205, 172.8),
-    infinite: false
-});
-  
-var map = L.map("map-item", {
-    crs: customcrs,
-    minZoom: 3,
-    maxZoom: 5,
-    zoom: 5,
-    
-    noWrap: true,
-    continuousWorld: false,
-    preferCanvas: true,
-    
-    center: [0, -1024],
-    maxBoundsViscosity: 1.0
-});
-    
-var customImageUrl = 'https://gta-assets.nopixel.net/images/dispatch-map.png';
-
-var sw = map.unproject([0, 1024], 3 - 1);
-var ne = map.unproject([1024, 0], 3 - 1);
-var mapbounds = new L.LatLngBounds(sw, ne);
-map.setView([-300, -1500], 4);
-map.setMaxBounds(mapbounds);
-
-
-map.attributionControl.setPrefix(false)
-L.imageOverlay(customImageUrl, mapbounds).addTo(map);
-
-map.on('dragend', function() {
-    if (!mapbounds.contains(map.getCenter())) {
-        map.panTo(mapbounds.getCenter(), { animate: false });
-    }
-});
-
-var Dispatches = {};
-var DispatchPing = L.divIcon({
-  html: '<i class="fa fa-location-dot fa-2x"></i>',
-  iconSize: [20, 20],
-  className: 'map-icon map-icon-ping',
-  offset: [-10, 0]
-});
-var mapMarkers = L.layerGroup();
-  
-function DispatchMAP(DISPATCH) {
-    var MIN = Math.round(Math.round((new Date() - new Date(DISPATCH.time)) / 1000) / 60);
-    if (MIN > 10) return;
-  
-    var COORDS_X = DISPATCH.origin.x
-    var COORDS_Y = DISPATCH.origin.y
-    var CODE = DISPATCH.callId
-  
-    Dispatches[CODE] = L.marker([COORDS_Y, COORDS_X], { icon: DispatchPing });
-    Dispatches[CODE].addTo(map);
-  
-    // Automatic deletion after a period of 20 minutes, equivalent to 1200000 milliseconds.
-    setTimeout(function() {
-      map.removeLayer(Dispatches[CODE]);
-    }, 1200000);
-    
-    Dispatches[CODE].bindTooltip(`<div class="map-tooltip-info">${DISPATCH.dispatchMessage}</div></div><div class="map-tooltip-id">#${DISPATCH.callId}</div>`,
-        {
-            direction: 'top',
-            permanent: false,
-            offset: [0, -10],
-            opacity: 1,
-            interactive: true,
-            className: 'map-tooltip'
-        });
-
-    Dispatches[CODE].addTo(mapMarkers);
-
-    Dispatches[CODE].on('click', function() {
-        const callId = CODE
-        $.post(
-            `https://${GetParentResourceName()}/setWaypoint`,
-            JSON.stringify({
-                callid: callId,
-            })
-        );
-    });
-
-    Dispatches[CODE].on('contextmenu', function() {
-        map.removeLayer(Dispatches[CODE]);
-    });
-
-}
-
-function ClearMap() {
-$(".leaflet-popup-pane").empty();
-$(".leaflet-marker-pane").empty();
-}
-
-$(".map-clear").on('click', function() {
-    $(".map-clear").empty();
-    $(".map-clear").prepend(
-      `<span class="fas fa-spinner fa-spin"></span>`
-    );
-    setTimeout(() => {
-      $(".map-clear").empty();
-      $(".map-clear").html("Clear");
-      ClearMap();
-    }, 1500);
-});

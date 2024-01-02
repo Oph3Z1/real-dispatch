@@ -5,6 +5,30 @@ Citizen.CreateThread(function()
     frameworkObject, Config.Framework = GetCore()
 end)
 
+RegisterCommand('addMarker', function()
+    local playerCoords = GetEntityCoords(PlayerPedId())
+    local processedData = {
+        {id = 1, x = playerCoords.x, y = playerCoords.y }
+    }
+
+    -- for k, v in pairs(data) do
+    --     local GetPlayers = GetPlayerFromServerId(v.id)
+    --     local PlayerPeds = GetPlayerPed(GetPlayers)
+    --     local GetCoords = GetEntityCoords(PlayerPeds)
+    --     table.insert(processedData, {
+    --         id = k,
+    --         x = GetCoords.x,
+    --         y = GetCoords.y
+    --     })
+    -- end
+    SendNUIMessage({
+        action = "OpenUI",
+        data = processedData
+    })
+    SetNuiFocus(true, true)
+end)
+
+
 RegisterCommand('opend', function()
     TriggerServerEvent('real-dispatch:GetPolices')
 end)
