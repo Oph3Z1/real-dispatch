@@ -8,9 +8,9 @@
   src: url('./fonts/Gilroy-Light.otf');
 }
 
-*{
+/* *{
   overflow: hidden;
-}
+} */
 
 html {
   user-select: none;  
@@ -93,4 +93,24 @@ body {
   font-style: normal;
   font-weight: 500;
   line-height: normal;
+}
+
+.map-item {
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  position: absolute;
+}
+
+.leaflet-marker-pane {
+z-index: 600;
+}
+
+.leaflet-tooltip-pane {
+z-index: 650;
+}
+
+.leaflet-tooltip-right {
+margin-left: 6px;
 }
