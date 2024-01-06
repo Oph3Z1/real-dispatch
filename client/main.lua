@@ -1,31 +1,53 @@
 frameworkObject = false
-PlayerJob = ""
-policetable = {}
+boolean = false
 
 Citizen.CreateThread(function()
     frameworkObject, Config.Framework = GetCore()
+    while not frameworkObject do
+        Citizen.Wait(0)
+    end
 end)
 
-RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
-    local Player = frameworkObject.Functions.GetPlayerData()
-    local name = Player.charinfo.firstname .. ' ' .. Player.charinfo.lastname
-    local coords = GetEntityCoords(PlayerPedId())
-    local job = Player.job.name
-
-    TriggerServerEvent('real-dispatch:GetPolices', job, name, coords)
-    print("OK")
+RegisterNetEvent('real-dispatch:Polices', function(data)
+    if boolean then
+        SendNUIMessage({
+            action = "UpdateLoc",
+            data = data
+        })
+    end
 end)
 
-RegisterNetEvent('real-dispatch:GetPoliceTable', function(table)
-    policetable = table
-    print(json.encode(policetable))
-end)
-
-RegisterCommand('addMarker', function()
-    print(json.encode(policetable))
+RegisterCommand('opend', function()
+    boolean = true
+    TriggerServerEvent('real-dispatch:Active', boolean)
     SendNUIMessage({
         action = "OpenUI",
-        data = policetable
     })
     SetNuiFocus(true, true)
 end)
+
+function Callback(name, payload)
+    if Config.Framework == "newesx" or Config.Framework == "oldesx" then
+        local data = nil
+        if frameworkObject then
+            frameworkObject.TriggerServerCallback(name, function(returndata)
+                data = returndata
+            end, payload)
+            while data == nil do
+                Citizen.Wait(0)
+            end
+        end
+        return data
+    else
+        local data = nil
+        if frameworkObject then
+            frameworkObject.Functions.TriggerCallback(name, function(returndata)
+                data = returndata
+            end, payload)
+            while data == nil do
+                Citizen.Wait(0)
+            end
+        end
+        return data
+    end
+end

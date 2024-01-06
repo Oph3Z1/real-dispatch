@@ -1,3 +1,9 @@
 Config = {}
 
-Config.Framework = 'autodetect' -- newqb, oldqb, newesx, oldesx, autodetect
+Config.Framework = 'newqb' -- newqb, oldqb, newesx, oldesx, autodetect
+
+Config.Jobs = {
+    ["police"] = {
+        status =  true
+    }
+}

@@ -1,25 +1,65 @@
 frameworkObject = nil
 local Polices = {}
+boolean = false
 
 Citizen.CreateThread(function()
     frameworkObject, Config.Framework = GetCore()
 end)
 
-RegisterNetEvent('real-dispatch:GetPolices')
-AddEventHandler('real-dispatch:GetPolices', function(job, name, coords)
-    local source = source
+local function GetPolicePlayers()
+    local swedenbby = {}
+    local Players = GetPlayers()
 
-    if Config.Framework == 'newqb' or Config.Framework == 'oldqb' then
-        local Player = frameworkObject.Functions.GetPlayer(source)
-        if Player.PlayerData.job.name == job then
-            table.insert(Polices, {
-                id = source,
-                name = name,
-                coords = coords
+    for i = 1, #Players do
+        Players[i] = tonumber(Players[i])
+        local player = frameworkObject.Functions.GetPlayer(Players[i])
+        if player.PlayerData.job.name == 'police' then
+            local coords = GetEntityCoords(GetPlayerPed(Players[i]))
+            local playername = player.PlayerData.charinfo.firstname .. ' ' .. player.PlayerData.charinfo.lastname
+            table.insert(swedenbby, {
+                id = Players[i],
+                name = playername,
+                coordsx = coords.x,
+                coordsy = coords.y,
             })
-            print(json.encode(Polices))
-            TriggerClientEvent('real-dispatch:GetPoliceTable', -1, Polices)
         end
-    else
+    end
+    return swedenbby
+end
+
+Citizen.CreateThread(function()
+    while true do
+        Citizen.Wait(5000)
+        if boolean then
+            local polices = GetPolicePlayers()
+            for k, v in pairs(polices) do
+                TriggerClientEvent('real-dispatch:Polices', v.id, polices)
+            end
+        end
     end
 end)
+
+RegisterNetEvent('real-dispatch:Active', function(data)
+    boolean = data
+end)
+
+function RegisterCallback(name, cbFunc, data)
+    while not frameworkObject do
+        Citizen.Wait(0)
+    end
+    if Config.Framework == "newesx" or Config.Framework == "oldesx" then
+        frameworkObject.RegisterServerCallback(
+            name,
+            function(source, cb, data)
+                cbFunc(source, cb)
+            end
+        )
+    else
+        frameworkObject.Functions.CreateCallback(
+            name,
+            function(source, cb, data)
+                cbFunc(source, cb)
+            end
+        )
+    end
+end

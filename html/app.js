@@ -11,59 +11,14 @@ const app = Vue.createApp({
             {id: 1, crime: 'Shooting!', time: '10:28 AM', info: {location: 'Alta Street', gender: 'Male', weapon: 'Pistol', vehiclestatus: 'On foot', plate: 'None', vehiclecolor: 'None'}, claimed: true},
             {id: 2, crime: 'Shooting!', time: '10:32 AM', info: {location: 'Capital Boulevard', gender: 'Female', weapon: 'AK-47', vehiclestatus: 'Sultan RS', plate: 'ABC3122', vehiclecolor: 'Red'}, claimed: false}
         ],
-        players: {},
+        players: [],
         SelectedDispatch: null,
         map: null,
         mapMarkers: null, 
         dispatchPing: null
     }),
 
-    methods: {    
-        dispatchMap(playersData) {
-            playersData.forEach(playerInfo => {
-                const playerId = playerInfo.id;
-                const playerCoords = { x: playerInfo.x, y: playerInfo.y };
-    
-                // Oyuncu zaten varsa, mevcut marker'ı güncelle
-                if (this.players[playerId]) {
-                    const existingMarker = this.players[playerId].marker;
-                    existingMarker.setLatLng([playerCoords.y, playerCoords.x]);
-                    return;
-                }
-    
-                // Yeni bir marker oluştur ve haritaya ekle
-                const newMarker = L.marker([playerCoords.y, playerCoords.x], { icon: this.dispatchPing });
-                newMarker.addTo(this.map);
-    
-                // Oyuncu bilgilerini table'a ekle
-                this.players[playerId] = { coords: playerCoords, marker: newMarker };
-    
-    
-                // Tooltip ayarla
-                newMarker.bindTooltip(`<div class="map-tooltip-info">Oyuncu #${playerId}</div>`, {
-                    direction: 'top',
-                    permanent: false,
-                    offset: [0, -10],
-                    opacity: 1,
-                    interactive: true,
-                    className: 'map-tooltip'
-                });
-    
-                // Marker'a tıklama olayını ekle
-                newMarker.on('click', () => {
-                    // Oyuncuya tıklanınca yapılacak işlemleri buraya ekleyebilirsiniz
-                    // Örneğin, bir HTTP isteği gönderme gibi
-                });
-            });
-        },
-
-        clearMap() {
-            this.$refs.mapClear.innerHTML = '<span class="fas fa-spinner fa-spin"></span>';
-            setTimeout(() => {
-                this.$refs.mapClear.innerHTML = 'Clear';
-            }, 1500);
-        },
-
+    methods: {         
         CreateMap() {
             const customcrs = L.extend({}, L.CRS.Simple, {
                 projection: L.Projection.LonLat,
@@ -82,20 +37,21 @@ const app = Vue.createApp({
                 crs: customcrs,
                 minZoom: 3,
                 maxZoom: 5,
-                zoom: 5,
                 noWrap: true,
                 continuousWorld: false,
                 preferCanvas: true,
-                center: [0, -1024],
                 maxBoundsViscosity: 1.0
-            });
+            });        
+
+            const initialCenter = [-300, -1500];
+            const initialZoom = 3;
     
             const customImageUrl = 'https://gta-assets.nopixel.net/images/dispatch-map.png';
             const sw = this.map.unproject([0, 1024], 3 - 1);
             const ne = this.map.unproject([1024, 0], 3 - 1);
             const mapbounds = new L.LatLngBounds(sw, ne);
     
-            this.map.setView([-300, -1500], 4);
+            this.map.setView(initialCenter, initialZoom);
             this.map.setMaxBounds(mapbounds);
     
             L.imageOverlay(customImageUrl, mapbounds).addTo(this.map);
@@ -108,7 +64,6 @@ const app = Vue.createApp({
                 }
             });
     
-            // Leaflet icon ve layerGroup ayarları
             this.dispatchPing = L.divIcon({
                 html: '<img src="img/police.png" class="map-icon" />',
                 iconSize: [20, 20],
@@ -119,6 +74,49 @@ const app = Vue.createApp({
             this.mapMarkers = L.layerGroup();
             this.map.addLayer(this.mapMarkers);
         },
+
+        dispatchMap(playersData) {
+            const markers = L.markerClusterGroup();
+        
+            const newMarkers = [];
+        
+            playersData.forEach(playerInfo => {
+                const playerId = playerInfo.id;
+                const playerCoords = { x: playerInfo.coordsx, y: playerInfo.coordsy };
+        
+                if (this.players[playerId]) {
+                    const existingMarker = this.players[playerId].marker;
+                    existingMarker.setLatLng([playerCoords.y, playerCoords.x]);
+                } else {
+                    const newMarker = L.marker([playerCoords.y, playerCoords.x], { icon: this.dispatchPing });
+        
+                    newMarker.bindTooltip(`<div class="map-tooltip-info">${playerInfo.name}</div>`, {
+                        direction: 'top',
+                        permanent: false,
+                        offset: [0, -10],
+                        opacity: 1,
+                        interactive: true,
+                        className: 'map-tooltip'
+                    });
+        
+                    newMarker.on('click', () => {
+                        console.log(playerId)
+                    });
+        
+                    newMarkers.push(newMarker);
+                    this.players[playerId] = { coords: playerCoords, marker: newMarker };
+                }
+            });
+            markers.addLayers(newMarkers);
+            this.map.addLayer(markers);
+        },        
+
+        clearMap() {
+            this.$refs.mapClear.innerHTML = '<span class="fas fa-spinner fa-spin"></span>';
+            setTimeout(() => {
+                this.$refs.mapClear.innerHTML = 'Clear';
+            }, 1500);
+        },  
     },
 
     computed: {
@@ -139,14 +137,14 @@ const app = Vue.createApp({
             
             if (data.action == 'OpenUI') {
                 this.Show = true
-
                 setTimeout(() => {
                     this.CreateMap()
-                    this.dispatchMap(data.data)
                 }, 10)
             }
 
             if (data.action == 'UpdateLoc') {
+                console.log(JSON.stringify(data.data))
+                this.dispatchMap(data.data)
             }
         });
     },      
