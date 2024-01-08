@@ -1,6 +1,7 @@
 frameworkObject = nil
 Polices = {}
 boolean = false
+tablefalanserver = {}
 
 Citizen.CreateThread(function()
     frameworkObject, Config.Framework = GetCore()
@@ -80,6 +81,12 @@ end
 
 RegisterNetEvent('real-dispatch:AddDispatchToServer', function(table)
     TriggerClientEvent('real-dispatch:SendDispatchToUI', -1, table)
+    tablefalanserver = table
+end)
+
+RegisterNetEvent('real-dispatch:GetDispatchDataFromServer', function()
+    local src = source
+    TriggerClientEvent('real-dispatch:OpenUI', src, tablefalanserver)
 end)
 
 Citizen.CreateThread(function()
@@ -96,7 +103,6 @@ Citizen.CreateThread(function()
                     end
                 end
             end
-            print(json.encode(Polices))
             TriggerClientEvent('real-dispatch:Polices', -1, Polices)
         end
     end

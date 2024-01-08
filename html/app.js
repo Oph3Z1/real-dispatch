@@ -120,6 +120,7 @@ const app = Vue.createApp({
         
         CloseUI() {
             this.Show = false
+            this.players = []
             if (this.map) {
                 this.map.remove()
                 this.map = null
