@@ -8,8 +8,8 @@ const app = Vue.createApp({
     data: () => ({
         Show: false,
         Dispatches: [
-            {id: 1, crime: 'Shooting!', time: '10:28 AM', info: {location: 'Alta Street', gender: 'Male', weapon: 'Pistol', vehiclestatus: 'On foot', plate: 'None', vehiclecolor: 'None'}, claimed: true},
-            {id: 2, crime: 'Shooting!', time: '10:32 AM', info: {location: 'Capital Boulevard', gender: 'Female', weapon: 'AK-47', vehiclestatus: 'Sultan RS', plate: 'ABC3122', vehiclecolor: 'Red'}, claimed: false}
+            // {id: 1, crime: 'Shooting!', time: '10:28 AM', info: {location: 'Alta Street', gender: 'Male', weapon: 'Pistol', vehiclestatus: 'On foot', plate: 'None', vehiclecolor: 'None'}, claimed: true},
+            // {id: 2, crime: 'Shooting!', time: '10:32 AM', info: {location: 'Capital Boulevard', gender: 'Female', weapon: 'AK-47', vehiclestatus: 'Sultan RS', plate: 'ABC3122', vehiclecolor: 'Red'}, claimed: false}
         ],
         players: [],
         SelectedDispatch: null,
@@ -36,7 +36,7 @@ const app = Vue.createApp({
             this.map = L.map("map-item", {
                 crs: customcrs,
                 minZoom: 3,
-                maxZoom: 5,
+                maxZoom: 3,
                 noWrap: true,
                 continuousWorld: false,
                 preferCanvas: true,
@@ -116,7 +116,16 @@ const app = Vue.createApp({
             setTimeout(() => {
                 this.$refs.mapClear.innerHTML = 'Clear';
             }, 1500);
-        },  
+        },
+        
+        CloseUI() {
+            this.Show = false
+            if (this.map) {
+                this.map.remove()
+                this.map = null
+            }
+            postNUI('CloseUI')
+        },
     },
 
     computed: {
@@ -137,6 +146,7 @@ const app = Vue.createApp({
             
             if (data.action == 'OpenUI') {
                 this.Show = true
+                this.Dispatches = data.dispatch
                 setTimeout(() => {
                     this.CreateMap()
                 }, 10)
@@ -145,6 +155,10 @@ const app = Vue.createApp({
             if (data.action == 'UpdateLoc') {
                 console.log(JSON.stringify(data.data))
                 this.dispatchMap(data.data)
+            }
+
+            if (data.action == 'AddDispatch') {
+                this.Dispatches = data.data
             }
         });
     },      
