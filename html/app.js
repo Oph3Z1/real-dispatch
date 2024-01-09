@@ -7,12 +7,15 @@ const store = Vuex.createStore({
 const app = Vue.createApp({
     data: () => ({
         Show: false,
+        SendedDispatchStatus: false,
         Dispatches: [
             // {id: 1, crime: 'Shooting!', time: '10:28 AM', info: {location: 'Alta Street', gender: 'Male', weapon: 'Pistol', vehiclestatus: 'On foot', plate: 'None', vehiclecolor: 'None'}, claimed: true},
             // {id: 2, crime: 'Shooting!', time: '10:32 AM', info: {location: 'Capital Boulevard', gender: 'Female', weapon: 'AK-47', vehiclestatus: 'Sultan RS', plate: 'ABC3122', vehiclecolor: 'Red'}, claimed: false}
         ],
         players: [],
         SelectedDispatch: null,
+        SelectedD: null,
+        SelectedDData: null,
         map: null,
         mapMarkers: null, 
         dispatchPing: null,
@@ -85,6 +88,7 @@ const app = Vue.createApp({
 
         dispatchMap(type, playersData, coordsx, coordsy) {
             if (type == 'normal') {
+                console.log("pls abe")
                 const markers = L.markerClusterGroup();
         
                 const newMarkers = [];
@@ -109,7 +113,9 @@ const app = Vue.createApp({
                         });
             
                         newMarker.on('click', () => {
-                            console.log(playerId)
+                            if (this.SelectedD) {
+                                console.log(JSON.stringify(this.SelectedDData))
+                            }
                         });
             
                         newMarkers.push(newMarker);
@@ -138,6 +144,17 @@ const app = Vue.createApp({
             }
             postNUI('CloseUI')
         },
+
+        SendDispatchToTargetPlayer(k, player, crime, time, info, claimed, expireTime) {
+            this.SelectedD = k
+            console.log(player)
+            console.log(crime)
+            console.log(time)
+            console.log(info)
+            console.log(JSON.stringify(info))
+            console.log(claimed)
+            console.log(expireTime)
+        }
     },
 
     computed: {
@@ -165,8 +182,7 @@ const app = Vue.createApp({
             }
 
             if (data.action == 'UpdateLoc') {
-                console.log(JSON.stringify(data.data))
-                this.dispatchMap('normal', data.data)
+                this.dispatchMap('normal', data.data, null, null)
             }
 
             if (data.action == 'AddDispatch') {
@@ -181,7 +197,7 @@ const app = Vue.createApp({
 
 app.use(store).mount("#app");
 
-const resourceName = window.GetParentResourceName ? window.GetParentResourceName() : "hog-PauseMenu";
+const resourceName = window.GetParentResourceName ? window.GetParentResourceName() : "real-dispatch";
 
 window.postNUI = async (name, data) => {
     try {

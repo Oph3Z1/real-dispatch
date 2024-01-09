@@ -12,12 +12,10 @@ Citizen.CreateThread(function()
 end)
 
 RegisterNetEvent('real-dispatch:Polices', function(data)
-    if boolean then
-        SendNUIMessage({
-            action = "UpdateLoc",
-            data = data
-        })
-    end
+    SendNUIMessage({
+        action = "UpdateLoc",
+        data = data
+    })
 end)
 
 RegisterCommand('opend', function()
@@ -115,7 +113,6 @@ Citizen.CreateThread(function()
                             vehiclecolor = vehiclecolor,
                         },
                         claimed = false,
-                        time = 0,
                         expireTime = 0,
                     })
                     AddDispatch(tablefalan, coords.x, coords.y)
@@ -138,7 +135,6 @@ Citizen.CreateThread(function()
                                         vehiclecolor = vehiclecolor,
                                     },
                                     claimed = false,
-                                    time = 0,
                                     expireTime = 0,
                                     coords = coords
                                 })
