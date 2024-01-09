@@ -79,8 +79,14 @@ if Config.Framework == 'newqb' or Config.Framework == 'oldqb' then
 else
 end
 
-RegisterNetEvent('real-dispatch:AddDispatchToServer', function(table)
-    TriggerClientEvent('real-dispatch:SendDispatchToUI', -1, table)
+RegisterNetEvent('real-dispatch:AddDispatchToServer', function(table, coordsx, coordsy)
+    local src = source
+    for k,v in pairs(table) do
+        v.player = src
+        v.time = os.date("%I:%M %p")
+        v.expireTime = os.time() + 60 * 0.5
+    end
+    TriggerClientEvent('real-dispatch:SendDispatchToUI', -1, table, coordsx, coordsy)
     tablefalanserver = table
 end)
 
@@ -112,23 +118,23 @@ RegisterNetEvent('real-dispatch:Active', function(data)
     boolean = data
 end)
 
-function RegisterCallback(name, cbFunc, data)
-    while not frameworkObject do
-        Citizen.Wait(0)
-    end
-    if Config.Framework == "newesx" or Config.Framework == "oldesx" then
-        frameworkObject.RegisterServerCallback(
-            name,
-            function(source, cb, data)
-                cbFunc(source, cb)
+Citizen.CreateThread(function()
+    while true do
+        Citizen.Wait(5000)
+        if boolean then
+            local currentTime = os.time()
+            local playerid = 0
+            for k, v in pairs(tablefalanserver) do
+                if k > 0 then
+                    if v.expireTime and currentTime > v.expireTime then
+                        playerid = v.player
+                        table.remove(tablefalanserver, k)
+                        TriggerClientEvent('real-dispatch:ClearPlayersDispatch', -1, playerid)
+                        TriggerClientEvent('real-dispatch:SendDispatchToUI', -1, tablefalanserver)
+                        break
+                    end
+                end
             end
-        )
-    else
-        frameworkObject.Functions.CreateCallback(
-            name,
-            function(source, cb, data)
-                cbFunc(source, cb)
-            end
-        )
+        end
     end
-end
+end)

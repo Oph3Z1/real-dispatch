@@ -25,14 +25,17 @@ RegisterCommand('opend', function()
     TriggerServerEvent('real-dispatch:GetDispatchDataFromServer')
 end)
 
-function AddDispatch(table)
-    TriggerServerEvent('real-dispatch:AddDispatchToServer', table)
+function AddDispatch(table, coordsx, coordsy)
+    TriggerServerEvent('real-dispatch:AddDispatchToServer', table, coordsx, coordsy)
 end
 
-RegisterNetEvent('real-dispatch:SendDispatchToUI', function(data)
+RegisterNetEvent('real-dispatch:SendDispatchToUI', function(data, coordsx, coordsy)
+    tablefalan = data
     SendNUIMessage({
         action = 'AddDispatch',
-        data = data
+        data = data,
+        coordsx = coordsx,
+        coordsy = coordsy
     })
 end)
 
@@ -44,63 +47,63 @@ RegisterNetEvent('real-dispatch:OpenUI', function(table)
     SetNuiFocus(true, true)
 end)
 
+RegisterNetEvent('real-dispatch:ClearPlayersDispatch', function(id)
+    reportedPlayers[id] = false
+end)
+
 Citizen.CreateThread(function()
     while true do
         local sleep = 500
-        local player = PlayerId()
-        local Player = GetPlayerPed(-1)
-        local checktime = 0
-        local sended = false
+        local Player = PlayerPedId()
 
         if IsPedArmed(Player, 4) then
             sleep = 5
-            if IsPedShooting(Player) and checktime == 0 and not sended and not IsWeaponBlackListed(Player) then
+            if IsPedShooting(Player) and not IsWeaponBlackListed(Player) then
                 if Config.SuppressorControl and WeaponHasSuppressor(Player) then
                     return
                 end
 
-                if not reportedPlayers[player] then
-                    local coords = GetEntityCoords(Player)
-                    local streethash = GetStreetNameAtCoord(table.unpack(coords))
-                    local street = GetStreetNameFromHashKey(streethash)
-                    local weaponhash = GetSelectedPedWeapon(Player)
-                    local weapon = Weapons[weaponhash].label
-                    local vehicle = GetVehiclePedIsIn(Player, 0)
-                    local vehiclename = GetDisplayNameFromVehicleModel(GetEntityModel(vehicle))
-                    local vehiclecolor
-                    local vehiclestatus
-                    local vehicleplate
-                    local gender
+                local coords = GetEntityCoords(Player)
+                local streethash = GetStreetNameAtCoord(table.unpack(coords))
+                local street = GetStreetNameFromHashKey(streethash)
+                local weaponhash = GetSelectedPedWeapon(Player)
+                local weapon = Weapons[weaponhash].label
+                local vehicle = GetVehiclePedIsIn(Player, 0)
+                local vehiclename = GetDisplayNameFromVehicleModel(GetEntityModel(vehicle))
+                local playeridfalanisteamksananeorospu = GetPlayerServerId(PlayerId())
+                local vehiclecolor
+                local vehiclestatus
+                local vehicleplate
+                local gender
 
-                    if Config.Framework == 'newqb' or Config.Framework == 'oldqb' then
-                        local Player = frameworkObject.Functions.GetPlayerData()
-                        if Player.charinfo.gender == 1 then
-                            gender = 'Female'
-                        else
-                            gender = 'Male'
-                        end
+                if Config.Framework == 'newqb' or Config.Framework == 'oldqb' then
+                    local Player = frameworkObject.Functions.GetPlayerData()
+                    if Player.charinfo.gender == 1 then
+                        gender = 'Female'
                     else
-                        if PlayerData.esx == 1 then
-                            gender = 'Female'
-                        else
-                            gender = 'Male'
-                        end
+                        gender = 'Male'
                     end
-
-                    if IsPedInAnyVehicle(Player, 0) then
-                        vehiclestatus = vehiclename
-                        vehicleplate = GetVehicleNumberPlateText(vehicle)
-                        vehiclecolor = GetVehicleColor(vehicle)
+                else
+                    if PlayerData.esx == 1 then
+                        gender = 'Female'
                     else
-                        vehiclestatus = 'On foot'
-                        vehicleplate = 'None'
-                        vehiclecolor = 'None'
+                        gender = 'Male'
                     end
+                end
 
-                    sended = true
-                    checktime = 120000
+                if IsPedInAnyVehicle(Player, 0) then
+                    vehiclestatus = vehiclename
+                    vehicleplate = GetVehicleNumberPlateText(vehicle)
+                    vehiclecolor = GetVehicleColorName(vehicle)
+                else
+                    vehiclestatus = 'On foot'
+                    vehicleplate = 'None'
+                    vehiclecolor = 'None'
+                end
+
+                if not reportedPlayers[playeridfalanisteamksananeorospu] then
                     table.insert(tablefalan, {
-                        player = player,
+                        player = playeridfalanisteamksananeorospu,
                         crime = 'Shooting!',
                         time = '',
                         info = {
@@ -111,11 +114,42 @@ Citizen.CreateThread(function()
                             plate = vehicleplate,
                             vehiclecolor = vehiclecolor,
                         },
-                        claimed = false
+                        claimed = false,
+                        time = 0,
+                        expireTime = 0,
                     })
-                    AddDispatch(tablefalan)
-                    reportedPlayers[player] = true
+                    AddDispatch(tablefalan, coords.x, coords.y)
+                    reportedPlayers[playeridfalanisteamksananeorospu] = true
+                else
+                    for k, v in pairs(tablefalan) do
+                        if v.player == playeridfalanisteamksananeorospu then
+                            if v.info.location ~= street or v.info.weapon ~= weapon or v.info.vehiclestatus ~= vehiclestatus or v.info.plate ~= vehicleplate or v.info.vehiclecolor ~= vehiclecolor then
+                                table.remove(tablefalan, k)
+                                table.insert(tablefalan, {
+                                    player = playeridfalanisteamksananeorospu,
+                                    crime = 'Shooting!',
+                                    time = '',
+                                    info = {
+                                        location = street,
+                                        gender = gender,
+                                        weapon = weapon,
+                                        vehiclestatus = vehiclestatus,
+                                        plate = vehicleplate,
+                                        vehiclecolor = vehiclecolor,
+                                    },
+                                    claimed = false,
+                                    time = 0,
+                                    expireTime = 0,
+                                    coords = coords
+                                })
+                                break
+                            end
+                        end
+                    end
+                    AddDispatch(tablefalan, coords.x, coords.y)
+                    reportedPlayers[playeridfalanisteamksananeorospu] = true
                 end
+                
             end
         end
         Citizen.Wait(sleep)
@@ -141,6 +175,20 @@ function WeaponHasSuppressor(Player)
     end
     Citizen.Wait(10)
     return false
+end
+
+function GetVehicleColorName(vehicle)
+    local vehicleColor1, vehicleColor2 = GetVehicleColor(vehicle)
+    local color1 = Config.Colors[tostring(vehicleColor1)]
+    local color2 = Config.Colors[tostring(vehicleColor2)]
+
+    if color1 then
+        return color1
+    elseif color2 then
+        return color2
+    else
+        return "Unknown"
+    end
 end
 
 RegisterNUICallback('CloseUI', function()

@@ -15,7 +15,8 @@ const app = Vue.createApp({
         SelectedDispatch: null,
         map: null,
         mapMarkers: null, 
-        dispatchPing: null
+        dispatchPing: null,
+        seconddispatchPing: null,
     }),
 
     methods: {         
@@ -70,53 +71,63 @@ const app = Vue.createApp({
                 className: 'map-icon-ping',
                 iconAnchor: [10, 20]
             });
+
+            this.seconddispatchPing = L.divIcon({
+                html: '<img src="img/report.png" class="map-icon" />',
+                iconSize: [20, 20],
+                className: 'map-icon-ping',
+                iconAnchor: [10, 20]
+            });
     
             this.mapMarkers = L.layerGroup();
             this.map.addLayer(this.mapMarkers);
         },
 
-        dispatchMap(playersData) {
-            const markers = L.markerClusterGroup();
+        dispatchMap(type, playersData, coordsx, coordsy) {
+            if (type == 'normal') {
+                const markers = L.markerClusterGroup();
         
-            const newMarkers = [];
-        
-            playersData.forEach(playerInfo => {
-                const playerId = playerInfo.id;
-                const playerCoords = { x: playerInfo.coordsx, y: playerInfo.coordsy };
-        
-                if (this.players[playerId]) {
-                    const existingMarker = this.players[playerId].marker;
-                    existingMarker.setLatLng([playerCoords.y, playerCoords.x]);
-                } else {
-                    const newMarker = L.marker([playerCoords.y, playerCoords.x], { icon: this.dispatchPing });
-        
-                    newMarker.bindTooltip(`<div class="map-tooltip-info">${playerInfo.name}</div>`, {
-                        direction: 'top',
-                        permanent: false,
-                        offset: [0, -10],
-                        opacity: 1,
-                        interactive: true,
-                        className: 'map-tooltip'
-                    });
-        
-                    newMarker.on('click', () => {
-                        console.log(playerId)
-                    });
-        
-                    newMarkers.push(newMarker);
-                    this.players[playerId] = { coords: playerCoords, marker: newMarker };
-                }
-            });
-            markers.addLayers(newMarkers);
-            this.map.addLayer(markers);
+                const newMarkers = [];
+            
+                playersData.forEach(playerInfo => {
+                    const playerId = playerInfo.id;
+                    const playerCoords = { x: playerInfo.coordsx, y: playerInfo.coordsy };
+            
+                    if (this.players[playerId]) {
+                        const existingMarker = this.players[playerId].marker;
+                        existingMarker.setLatLng([playerCoords.y, playerCoords.x]);
+                    } else {
+                        const newMarker = L.marker([playerCoords.y, playerCoords.x], { icon: this.dispatchPing });
+            
+                        newMarker.bindTooltip(`<div class="map-tooltip-info">${playerInfo.name}</div>`, {
+                            direction: 'top',
+                            permanent: false,
+                            offset: [0, -10],
+                            opacity: 1,
+                            interactive: true,
+                            className: 'map-tooltip'
+                        });
+            
+                        newMarker.on('click', () => {
+                            console.log(playerId)
+                        });
+            
+                        newMarkers.push(newMarker);
+                        this.players[playerId] = { coords: playerCoords, marker: newMarker };
+                    }
+                });
+                markers.addLayers(newMarkers);
+                this.map.addLayer(markers);
+            } else {
+                const newMarker = L.marker([coordsx, coordsy], { icon: this.seconddispatchPing });
+    
+                this.mapMarkers.addLayer(newMarker);
+    
+                setTimeout(() => {
+                    this.mapMarkers.removeLayer(newMarker);
+                }, 15000);
+            }
         },        
-
-        clearMap() {
-            this.$refs.mapClear.innerHTML = '<span class="fas fa-spinner fa-spin"></span>';
-            setTimeout(() => {
-                this.$refs.mapClear.innerHTML = 'Clear';
-            }, 1500);
-        },
         
         CloseUI() {
             this.Show = false
@@ -155,10 +166,13 @@ const app = Vue.createApp({
 
             if (data.action == 'UpdateLoc') {
                 console.log(JSON.stringify(data.data))
-                this.dispatchMap(data.data)
+                this.dispatchMap('normal', data.data)
             }
 
             if (data.action == 'AddDispatch') {
+                console.log(data.coordsx)
+                console.log(data.coordsy)
+                this.dispatchMap('gecici', null, data.coordsx, data.coordsy)
                 this.Dispatches = data.data
             }
         });
