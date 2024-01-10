@@ -20,6 +20,16 @@ const app = Vue.createApp({
         mapMarkers: null, 
         dispatchPing: null,
         seconddispatchPing: null,
+        selectedcrime: null,
+        selectedtime: null,
+        selectedloc: null,
+        selectedgender: null,
+        selectedvehiclestatus: null,
+        selectedvehiclecolor: null,
+        selectedplate: null,
+        selectedweapon: null,
+        selectedcoords: null,
+        
     }),
 
     methods: {         
@@ -88,7 +98,6 @@ const app = Vue.createApp({
 
         dispatchMap(type, playersData, coordsx, coordsy) {
             if (type == 'normal') {
-                console.log("pls abe")
                 const markers = L.markerClusterGroup();
         
                 const newMarkers = [];
@@ -113,8 +122,17 @@ const app = Vue.createApp({
                         });
             
                         newMarker.on('click', () => {
-                            if (this.SelectedD) {
-                                console.log(JSON.stringify(this.SelectedDData))
+                            if (this.SelectedD != null || this.SelectedD != false) {
+                                console.log("ok?")
+                                postNUI('SendDispatchToTargetPlayer', {
+                                    player: playerId,
+                                    crime: this.selectedcrime,
+                                    time: this.selectedtime,
+                                    info: this.selectedinfo,
+                                    coords: this.selectedcoords
+                                })
+                            } else {
+                                console.log(this.SelectedD)
                             }
                         });
             
@@ -125,7 +143,7 @@ const app = Vue.createApp({
                 markers.addLayers(newMarkers);
                 this.map.addLayer(markers);
             } else {
-                const newMarker = L.marker([coordsx, coordsy], { icon: this.seconddispatchPing });
+                const newMarker = L.marker([coordsy, coordsx], { icon: this.seconddispatchPing });
     
                 this.mapMarkers.addLayer(newMarker);
     
@@ -145,16 +163,19 @@ const app = Vue.createApp({
             postNUI('CloseUI')
         },
 
-        SendDispatchToTargetPlayer(k, player, crime, time, info, claimed, expireTime) {
+        SendDispatchToTargetPlayer(k, player, crime, time, info, coords, loc, gender, vehstatus, vehcolor, plate, weapon) {
             this.SelectedD = k
-            console.log(player)
-            console.log(crime)
-            console.log(time)
-            console.log(info)
-            console.log(JSON.stringify(info))
-            console.log(claimed)
-            console.log(expireTime)
-        }
+            this.selectedcrime = crime
+            this.selectedtime = time
+            this.selectedinfo = info
+            this.selectedcoords = coords
+            this.selectedloc = loc
+            this.selectedgender = gender
+            this.selectedvehiclestatus = vehstatus
+            this.selectedvehiclecolor = vehcolor
+            this.selectedplate = plate
+            this.selectedweapon = weapon
+        },
     },
 
     computed: {
@@ -186,10 +207,35 @@ const app = Vue.createApp({
             }
 
             if (data.action == 'AddDispatch') {
-                console.log(data.coordsx)
-                console.log(data.coordsy)
                 this.dispatchMap('gecici', null, data.coordsx, data.coordsy)
                 this.Dispatches = data.data
+            }
+
+            if (data.action == 'SendDispatch') {
+                this.SendedDispatchStatus = true
+
+                setTimeout(() => {
+                    this.SendedDispatchStatus = false
+                    this.selectedcrime = null
+                    this.selectedtime = null
+                    this.selectedinfo = null
+                    this.selectedcoords = null
+                }, 30000)
+            }
+        });
+
+        window.addEventListener('keydown', (event) => {
+            if (event.key == 'Escape') {
+                if (this.Show) {
+                    this.CloseUI()
+                }
+            } else if (event.key == 'y' || event.key == 'Y') {
+                if (this.SendedDispatchStatus) {
+                    postNUI('SetGPS', {
+                        coordsx: this.selectedcoords.x,
+                        coordsy: this.selectedcoords.y,
+                    })
+                }
             }
         });
     },      

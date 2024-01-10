@@ -95,6 +95,11 @@ RegisterNetEvent('real-dispatch:GetDispatchDataFromServer', function()
     TriggerClientEvent('real-dispatch:OpenUI', src, tablefalanserver)
 end)
 
+RegisterNetEvent('real-dispatch:Server:SendDispatchToTargetPlayer', function(data)
+    local jsondata = json.encode(data)
+    TriggerClientEvent('real-disapatch:Client:SendDispatchToTargetPlayer', data.player, data)
+end)
+
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(5000)

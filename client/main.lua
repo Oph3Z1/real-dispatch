@@ -49,6 +49,13 @@ RegisterNetEvent('real-dispatch:ClearPlayersDispatch', function(id)
     reportedPlayers[id] = false
 end)
 
+RegisterNetEvent('real-disapatch:Client:SendDispatchToTargetPlayer', function(data)
+    SendNUIMessage({
+        action = "SendDispatch",
+        data = data
+    })
+end)
+
 Citizen.CreateThread(function()
     while true do
         local sleep = 500
@@ -114,6 +121,7 @@ Citizen.CreateThread(function()
                         },
                         claimed = false,
                         expireTime = 0,
+                        coords = coords
                     })
                     AddDispatch(tablefalan, coords.x, coords.y)
                     reportedPlayers[playeridfalanisteamksananeorospu] = true
@@ -186,6 +194,15 @@ function GetVehicleColorName(vehicle)
         return "Unknown"
     end
 end
+
+RegisterNUICallback('SendDispatchToTargetPlayer', function(data, cb)
+    TriggerServerEvent('real-dispatch:Server:SendDispatchToTargetPlayer', data)
+end)
+
+RegisterNUICallback('SetGPS', function(data, cb)
+    local dataf = json.encode(data)
+    print(dataf.x, dataf.y, 204)
+end)
 
 RegisterNUICallback('CloseUI', function()
     TriggerServerEvent('real-dispatch:Active', false)

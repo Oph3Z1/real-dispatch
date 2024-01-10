@@ -91,7 +91,7 @@
                                 </div>
                                 <div class="w-[30%] h-full flex flex-col items-center justify-center">
                                     <span class="time-text ml-[1.3vw]">{{ v.time }}</span>
-                                    <div class="w-[70%] h-[35%] flex items-center justify-center bg-[#202124] border-[.1vw] border-[#3D3E40] my-[.7vw] hover:cursor-pointer" @click="SendDispatchToTargetPlayer(k, v.player, v.crime, v.time, v.info, v.claimed, v.expireTime)"> <span class="select-text" v-if="SelectedD != k">Select</span> <span class="select-text" v-if="SelectedD == k">Selected</span> </div>
+                                    <div class="w-[70%] h-[35%] flex items-center justify-center bg-[#202124] border-[.1vw] border-[#3D3E40] my-[.7vw] hover:cursor-pointer" @click="SendDispatchToTargetPlayer(k, v.player, v.crime, v.time, v.info, v.coords, v.info.location, v.info.gender, v.info.vehiclestatus, v.info.vehiclecolor, v.info.plate, v.info.weapon)"> <span class="select-text" v-if="SelectedD != k">Select</span> <span class="select-text" v-if="SelectedD == k">Selected</span> </div>
                                 </div>
                             </div>
                         </div>
@@ -111,38 +111,38 @@
                             <div class="w-[80%] h-[30%] flex items-center justify-start ml-[1.1vw]">
                                 <img src="./img/location.png" class="mr-[.2vw]">
                                 <span style="color: #FFF; font-family: regular; font-size: .7292vw; font-style: normal; font-weight: 500; line-height: normal; margin-right: .3vw;">-</span>
-                                <span class="crime-info-text">LS Beach</span>
+                                <span class="crime-info-text">{{ selectedloc }}</span>
                             </div>
                             <div class="w-[90%] h-[30%] flex items-center justify-start ml-[1.1vw]">
                                 <img src="./img/gender.png" class="mr-[.2vw]">
                                 <span style="color: #FFF; font-family: regular; font-size: .7292vw; font-style: normal; font-weight: 500; line-height: normal; margin-right: .3vw;">-</span>
-                                <span class="crime-info-text">Male</span>
+                                <span class="crime-info-text">{{ selectedgender }}</span>
                             </div>
                             <div class="w-[90%] h-[30%] flex items-center justify-start ml-[1.1vw]">
                                 <img src="./img/pistol.png" class="mr-[.2vw]">
                                 <span style="color: #FFF; font-family: regular; font-size: .7292vw; font-style: normal; font-weight: 500; line-height: normal; margin-right: .3vw;">-</span>
-                                <span class="crime-info-text">Pistol</span>
+                                <span class="crime-info-text">{{ selectedweapon }}</span>
                             </div>
                         </div>
                         <div class="w-[33.3333333%] h-full flex flex-col ml-[.5vw]">
                             <div class="w-[80%] h-[30%] flex items-center justify-start ml-[1.1vw]">
                                 <img src="./img/car.png" class="mr-[.2vw]">
                                 <span style="color: #FFF; font-family: regular; font-size: .7292vw; font-style: normal; font-weight: 500; line-height: normal; margin-right: .3vw;">-</span>
-                                <span class="crime-info-text">SULTAN</span>
+                                <span class="crime-info-text">{{ selectedvehiclestatus }}</span>
                             </div>
                             <div class="w-[90%] h-[30%] flex items-center justify-start ml-[1.1vw]">
                                 <img src="./img/plate.png" class="mr-[.2vw]">
                                 <span style="color: #FFF; font-family: regular; font-size: .7292vw; font-style: normal; font-weight: 500; line-height: normal; margin-right: .3vw;">-</span>
-                                <span class="crime-info-text">ABC1234</span>
+                                <span class="crime-info-text">{{ selectedplate }}</span>
                             </div>
                             <div class="w-[90%] h-[30%] flex items-center justify-start ml-[1.1vw]">
                                 <img src="./img/color.png" class="mr-[.2vw]">
                                 <span style="color: #FFF; font-family: regular; font-size: .7292vw; font-style: normal; font-weight: 500; line-height: normal; margin-right: .3vw;">-</span>
-                                <span class="crime-info-text">Pink</span>
+                                <span class="crime-info-text">{{ selectedvehiclecolor }}</span>
                             </div>
                         </div>
                         <div class="w-[30%] h-full flex flex-col items-center justify-center">
-                            <span class="time-text ml-[1.3vw]">01:00</span>
+                            <span class="time-text ml-[1.3vw]">{{ selectedtime }}</span>
                             <div class="w-[70%] h-[35%] flex items-center justify-center bg-[#202124] border-[.1vw] border-[#3D3E40] hover:cursor-pointer my-[.7vw]"> <span class="select-text">Y Set GPS</span> </div>
                         </div>
                     </div>
