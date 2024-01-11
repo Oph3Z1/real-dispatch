@@ -3,6 +3,9 @@ boolean = false
 dispatchreported = false
 tablefalan = {}
 reportedPlayers = {}
+cansetgps = false
+pointx = 0
+pointy = 0
 
 Citizen.CreateThread(function()
     frameworkObject, Config.Framework = GetCore()
@@ -27,13 +30,14 @@ function AddDispatch(table, coordsx, coordsy)
     TriggerServerEvent('real-dispatch:AddDispatchToServer', table, coordsx, coordsy)
 end
 
-RegisterNetEvent('real-dispatch:SendDispatchToUI', function(data, coordsx, coordsy)
+RegisterNetEvent('real-dispatch:SendDispatchToUI', function(data, coordsx, coordsy, type)
     tablefalan = data
     SendNUIMessage({
         action = 'AddDispatch',
         data = data,
         coordsx = coordsx,
-        coordsy = coordsy
+        coordsy = coordsy,
+        type = type
     })
 end)
 
@@ -54,6 +58,9 @@ RegisterNetEvent('real-disapatch:Client:SendDispatchToTargetPlayer', function(da
         action = "SendDispatch",
         data = data
     })
+    cansetgps = true
+    pointx = data.coords.x
+    pointy = data.coords.y
 end)
 
 Citizen.CreateThread(function()
@@ -160,6 +167,22 @@ Citizen.CreateThread(function()
     end
 end)
 
+Citizen.CreateThread(function()
+    while true do
+        Citizen.Wait(0)
+        if cansetgps then
+            if IsControlJustReleased(0, Config.SetGPSKey) then
+                SetWaypointOff() 
+                SetNewWaypoint(pointx, pointy)
+                SendNUIMessage({
+                    action = 'RemoveDispatch'
+                })
+                cansetgps = false
+            end
+        end
+    end
+end)
+
 function IsWeaponBlackListed(Player)
     for k, v in pairs(Config.BlackListedWeapons) do
         local weapon = GetHashKey(Config.BlackListedWeapons[k])
@@ -199,38 +222,7 @@ RegisterNUICallback('SendDispatchToTargetPlayer', function(data, cb)
     TriggerServerEvent('real-dispatch:Server:SendDispatchToTargetPlayer', data)
 end)
 
-RegisterNUICallback('SetGPS', function(data, cb)
-    local dataf = json.encode(data)
-    print(dataf.x, dataf.y, 204)
-end)
-
 RegisterNUICallback('CloseUI', function()
     TriggerServerEvent('real-dispatch:Active', false)
     SetNuiFocus(false, false)
 end)
-
-function Callback(name, payload)
-    if Config.Framework == "newesx" or Config.Framework == "oldesx" then
-        local data = nil
-        if frameworkObject then
-            frameworkObject.TriggerServerCallback(name, function(returndata)
-                data = returndata
-            end, payload)
-            while data == nil do
-                Citizen.Wait(0)
-            end
-        end
-        return data
-    else
-        local data = nil
-        if frameworkObject then
-            frameworkObject.Functions.TriggerCallback(name, function(returndata)
-                data = returndata
-            end, payload)
-            while data == nil do
-                Citizen.Wait(0)
-            end
-        end
-        return data
-    end
-end

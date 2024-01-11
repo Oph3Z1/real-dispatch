@@ -123,16 +123,20 @@ const app = Vue.createApp({
             
                         newMarker.on('click', () => {
                             if (this.SelectedD != null || this.SelectedD != false) {
-                                console.log("ok?")
                                 postNUI('SendDispatchToTargetPlayer', {
+                                    tableid: this.SelectedD + 1,
                                     player: playerId,
                                     crime: this.selectedcrime,
                                     time: this.selectedtime,
                                     info: this.selectedinfo,
-                                    coords: this.selectedcoords
+                                    coords: this.selectedcoords,
+                                    loc: this.selectedloc,
+                                    gender: this.selectedgender ,
+                                    vehstatus: this.selectedvehiclestatus,
+                                    vehcolor: this.selectedvehiclecolor ,
+                                    plate: this.selectedplate ,
+                                    weapon: this.selectedweapon,
                                 })
-                            } else {
-                                console.log(this.SelectedD)
                             }
                         });
             
@@ -207,12 +211,23 @@ const app = Vue.createApp({
             }
 
             if (data.action == 'AddDispatch') {
-                this.dispatchMap('gecici', null, data.coordsx, data.coordsy)
-                this.Dispatches = data.data
+                if (data.type == 'normal') {
+                    this.dispatchMap('gecici', null, data.coordsx, data.coordsy)
+                    this.Dispatches = data.data
+                } else if (data.type == 'remove') {
+                    this.Dispatches = data.data
+                }
             }
 
             if (data.action == 'SendDispatch') {
                 this.SendedDispatchStatus = true
+
+                this.selectedloc = data.data.loc
+                this.selectedgender = data.data.gender
+                this.selectedvehiclestatus = data.data.vehstatus
+                this.selectedvehiclecolor = data.data.vehcolor
+                this.selectedplate = data.data.plate
+                this.selectedweapon = data.data.weapon
 
                 setTimeout(() => {
                     this.SendedDispatchStatus = false
@@ -220,7 +235,27 @@ const app = Vue.createApp({
                     this.selectedtime = null
                     this.selectedinfo = null
                     this.selectedcoords = null
+                    this.selectedloc = null
+                    this.selectedgender = null
+                    this.selectedvehiclestatus = null
+                    this.selectedvehiclecolor = null
+                    this.selectedplate = null
+                    this.selectedweapon = null
                 }, 30000)
+            }
+
+            if (data.action == 'RemoveDispatch') {
+                this.SendedDispatchStatus = false
+                this.selectedcrime = null
+                this.selectedtime = null
+                this.selectedinfo = null
+                this.selectedcoords = null
+                this.selectedloc = null
+                this.selectedgender = null
+                this.selectedvehiclestatus = null
+                this.selectedvehiclecolor = null
+                this.selectedplate = null
+                this.selectedweapon = null
             }
         });
 
@@ -228,13 +263,6 @@ const app = Vue.createApp({
             if (event.key == 'Escape') {
                 if (this.Show) {
                     this.CloseUI()
-                }
-            } else if (event.key == 'y' || event.key == 'Y') {
-                if (this.SendedDispatchStatus) {
-                    postNUI('SetGPS', {
-                        coordsx: this.selectedcoords.x,
-                        coordsy: this.selectedcoords.y,
-                    })
                 }
             }
         });

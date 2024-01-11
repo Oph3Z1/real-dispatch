@@ -3,6 +3,8 @@ Config = {}
 Config.Framework = 'newqb' -- newqb, oldqb, newesx, oldesx, autodetect
 
 Config.SuppressorControl = true
+Config.SetGPSKey = 246 -- https://docs.fivem.net/docs/game-references/controls/
+Config.UpdateLocationTime = 1 -- in second
 
 Config.BlackListedWeapons = {
     'WEAPON_STUNGUN',
