@@ -6,223 +6,250 @@ reportedPlayers = {}
 cansetgps = false
 pointx = 0
 pointy = 0
+tableid = nil
+playerindatasiamk = {}
+playerinjobu = ""
 
 Citizen.CreateThread(function()
     frameworkObject, Config.Framework = GetCore()
     while not frameworkObject do
         Citizen.Wait(0)
     end
-end)
-
-RegisterNetEvent('real-dispatch:Polices', function(data)
-    SendNUIMessage({
-        action = "UpdateLoc",
-        data = data
-    })
-end)
-
-RegisterCommand('opend', function()
-    TriggerServerEvent('real-dispatch:Active', true)
-    TriggerServerEvent('real-dispatch:GetDispatchDataFromServer')
-end)
-
-function AddDispatch(table, coordsx, coordsy)
-    TriggerServerEvent('real-dispatch:AddDispatchToServer', table, coordsx, coordsy)
-end
-
-RegisterNetEvent('real-dispatch:SendDispatchToUI', function(data, coordsx, coordsy, type)
-    tablefalan = data
-    SendNUIMessage({
-        action = 'AddDispatch',
-        data = data,
-        coordsx = coordsx,
-        coordsy = coordsy,
-        type = type
-    })
-end)
-
-RegisterNetEvent('real-dispatch:OpenUI', function(table)
-    SendNUIMessage({
-        action = "OpenUI",
-        dispatch = table,
-    })
-    SetNuiFocus(true, true)
-end)
-
-RegisterNetEvent('real-dispatch:ClearPlayersDispatch', function(id)
-    reportedPlayers[id] = false
-end)
-
-RegisterNetEvent('real-disapatch:Client:SendDispatchToTargetPlayer', function(data)
-    SendNUIMessage({
-        action = "SendDispatch",
-        data = data
-    })
-    cansetgps = true
-    pointx = data.coords.x
-    pointy = data.coords.y
+    Citizen.Wait(1500)
+    StartDispatchSystem()
 end)
 
 Citizen.CreateThread(function()
     while true do
-        local sleep = 500
-        local Player = PlayerPedId()
+        Citizen.Wait(1000)
+        if Config.Framework == 'newqb' or Config.Framework == 'oldqb' then
+            playerindatasiamk = frameworkObject.Functions.GetPlayerData()
+            playerinjobu = playerindatasiamk.job.name
+        else
+            playerindatasiamk = frameworkObject.GetPlayerData()
+            playerinjobu = playerindatasiamk.job.name
+        end
+    end
+end)
 
-        if IsPedArmed(Player, 4) then
-            sleep = 5
-            if IsPedShooting(Player) and not IsWeaponBlackListed(Player) then
-                if Config.SuppressorControl and WeaponHasSuppressor(Player) then
-                    return
-                end
+if Config.DispatchType == 'advanced' then
 
-                local coords = GetEntityCoords(Player)
-                local streethash = GetStreetNameAtCoord(table.unpack(coords))
-                local street = GetStreetNameFromHashKey(streethash)
-                local weaponhash = GetSelectedPedWeapon(Player)
-                local weapon = Weapons[weaponhash].label
-                local vehicle = GetVehiclePedIsIn(Player, 0)
-                local vehiclename = GetDisplayNameFromVehicleModel(GetEntityModel(vehicle))
-                local playeridfalanisteamksananeorospu = GetPlayerServerId(PlayerId())
-                local vehiclecolor
-                local vehiclestatus
-                local vehicleplate
-                local gender
+    RegisterNetEvent('real-dispatch:StartDispatchSystem', function()
+        TriggerServerEvent('real-dispatch:Active', true)
+        TriggerServerEvent('real-dispatch:GetDispatchDataFromServer')
+    end)
 
-                if Config.Framework == 'newqb' or Config.Framework == 'oldqb' then
-                    local Player = frameworkObject.Functions.GetPlayerData()
-                    if Player.charinfo.gender == 1 then
-                        gender = 'Female'
-                    else
-                        gender = 'Male'
-                    end
-                else
-                    if PlayerData.esx == 1 then
-                        gender = 'Female'
-                    else
-                        gender = 'Male'
-                    end
-                end
-
-                if IsPedInAnyVehicle(Player, 0) then
-                    vehiclestatus = vehiclename
-                    vehicleplate = GetVehicleNumberPlateText(vehicle)
-                    vehiclecolor = GetVehicleColorName(vehicle)
-                else
-                    vehiclestatus = 'On foot'
-                    vehicleplate = 'None'
-                    vehiclecolor = 'None'
-                end
-
-                if not reportedPlayers[playeridfalanisteamksananeorospu] then
-                    table.insert(tablefalan, {
-                        player = playeridfalanisteamksananeorospu,
-                        crime = 'Shooting!',
-                        time = '',
-                        info = {
-                            location = street,
-                            gender = gender,
-                            weapon = weapon,
-                            vehiclestatus = vehiclestatus,
-                            plate = vehicleplate,
-                            vehiclecolor = vehiclecolor,
-                        },
-                        claimed = false,
-                        expireTime = 0,
-                        coords = coords
-                    })
-                    AddDispatch(tablefalan, coords.x, coords.y)
-                    reportedPlayers[playeridfalanisteamksananeorospu] = true
-                else
-                    for k, v in pairs(tablefalan) do
-                        if v.player == playeridfalanisteamksananeorospu then
-                            if v.info.location ~= street or v.info.weapon ~= weapon or v.info.vehiclestatus ~= vehiclestatus or v.info.plate ~= vehicleplate or v.info.vehiclecolor ~= vehiclecolor then
-                                table.remove(tablefalan, k)
-                                table.insert(tablefalan, {
-                                    player = playeridfalanisteamksananeorospu,
-                                    crime = 'Shooting!',
-                                    time = '',
-                                    info = {
-                                        location = street,
-                                        gender = gender,
-                                        weapon = weapon,
-                                        vehiclestatus = vehiclestatus,
-                                        plate = vehicleplate,
-                                        vehiclecolor = vehiclecolor,
-                                    },
-                                    claimed = false,
-                                    expireTime = 0,
-                                    coords = coords
-                                })
-                                break
+    RegisterNetEvent('real-dispatch:Polices', function(data)
+        SendNUIMessage({
+            action = "UpdateLoc",
+            data = data
+        })
+    end)
+    
+    function AddDispatch(table, coordsx, coordsy)
+        TriggerServerEvent('real-dispatch:AddDispatchToServer', table, coordsx, coordsy)
+    end
+    
+    RegisterNetEvent('real-dispatch:SendDispatchToUI', function(data, coordsx, coordsy, type)
+        SendNUIMessage({
+            action = 'AddDispatch',
+            data = data,
+            coordsx = coordsx,
+            coordsy = coordsy,
+            type = type
+        })
+    end)
+    
+    RegisterNetEvent('real-dispatch:OpenUI', function(table)
+        SendNUIMessage({
+            action = "OpenUI",
+            dispatch = table,
+        })
+        SetNuiFocus(true, true)
+    end)
+    
+    RegisterNetEvent('real-dispatch:ClearPlayersDispatch', function(id)
+        reportedPlayers[id] = false
+    end)
+    
+    RegisterNetEvent('real-dispatch:ChangeTable', function(data)
+        tablefalan = data
+    end)
+    
+    RegisterNetEvent('real-disapatch:Client:SendDispatchToTargetPlayer', function(data)
+        SendNUIMessage({
+            action = "SendDispatch",
+            data = data
+        })
+        cansetgps = true
+        pointx = data.coords.x
+        pointy = data.coords.y
+    end)
+    
+    Citizen.CreateThread(function()
+        while true do
+            local sleep = 500
+            local Player = PlayerPedId()
+    
+            if playerinjobu ~= 'police' then
+                if IsPedArmed(Player, 4) then
+                    sleep = 5
+                    if IsPedShooting(Player) and not IsWeaponBlackListed(Player) then
+                        if Config.SuppressorControl and WeaponHasSuppressor(Player) then
+                            return
+                        end
+        
+                        local coords = GetEntityCoords(Player)
+                        local streethash = GetStreetNameAtCoord(table.unpack(coords))
+                        local street = GetStreetNameFromHashKey(streethash)
+                        local weaponhash = GetSelectedPedWeapon(Player)
+                        local weapon = Weapons[weaponhash].label
+                        local vehicle = GetVehiclePedIsIn(Player, 0)
+                        local vehiclename = GetDisplayNameFromVehicleModel(GetEntityModel(vehicle))
+                        local playeridfalanisteamksananeorospu = GetPlayerServerId(PlayerId())
+                        local vehiclecolor
+                        local vehiclestatus
+                        local vehicleplate
+                        local gender
+        
+                        if Config.Framework == 'newqb' or Config.Framework == 'oldqb' then
+                            local Player = frameworkObject.Functions.GetPlayerData()
+                            if Player.charinfo.gender == 1 then
+                                gender = 'Female'
+                            else
+                                gender = 'Male'
+                            end
+                        else
+                            if PlayerData.esx == 1 then
+                                gender = 'Female'
+                            else
+                                gender = 'Male'
                             end
                         end
+        
+                        if IsPedInAnyVehicle(Player, 0) then
+                            vehiclestatus = vehiclename
+                            vehicleplate = GetVehicleNumberPlateText(vehicle)
+                            vehiclecolor = GetVehicleColorName(vehicle)
+                        else
+                            vehiclestatus = 'On foot'
+                            vehicleplate = 'None'
+                            vehiclecolor = 'None'
+                        end
+        
+                        if not reportedPlayers[playeridfalanisteamksananeorospu] then
+                            table.insert(tablefalan, {
+                                player = playeridfalanisteamksananeorospu,
+                                crime = 'Shooting!',
+                                time = '',
+                                info = {
+                                    location = street,
+                                    gender = gender,
+                                    weapon = weapon,
+                                    vehiclestatus = vehiclestatus,
+                                    plate = vehicleplate,
+                                    vehiclecolor = vehiclecolor,
+                                },
+                                claimed = false,
+                                expireTime = 0,
+                                coords = coords
+                            })
+                            AddDispatch(tablefalan, coords.x, coords.y)
+                            reportedPlayers[playeridfalanisteamksananeorospu] = true
+                        else
+                            for k, v in pairs(tablefalan) do
+                                if v.player == playeridfalanisteamksananeorospu then
+                                    if v.info.location ~= street or v.info.weapon ~= weapon or v.info.vehiclestatus ~= vehiclestatus or v.info.plate ~= vehicleplate or v.info.vehiclecolor ~= vehiclecolor then
+                                        table.remove(tablefalan, k)
+                                        table.insert(tablefalan, {
+                                            player = playeridfalanisteamksananeorospu,
+                                            crime = 'Shooting!',
+                                            time = '',
+                                            info = {
+                                                location = street,
+                                                gender = gender,
+                                                weapon = weapon,
+                                                vehiclestatus = vehiclestatus,
+                                                plate = vehicleplate,
+                                                vehiclecolor = vehiclecolor,
+                                            },
+                                            claimed = false,
+                                            expireTime = 0,
+                                            coords = coords
+                                        })
+                                        break
+                                    end
+                                end
+                            end
+                            AddDispatch(tablefalan, coords.x, coords.y)
+                            reportedPlayers[playeridfalanisteamksananeorospu] = true
+                        end
+                        
                     end
-                    AddDispatch(tablefalan, coords.x, coords.y)
-                    reportedPlayers[playeridfalanisteamksananeorospu] = true
                 end
-                
+            end
+            Citizen.Wait(sleep)
+        end
+    end)
+    
+    Citizen.CreateThread(function()
+        while true do
+            Citizen.Wait(0)
+            if cansetgps then
+                if IsControlJustReleased(0, Config.SetGPSKey) then
+                    SetWaypointOff() 
+                    SetNewWaypoint(pointx, pointy)
+                    SendNUIMessage({
+                        action = 'RemoveDispatch'
+                    })
+                    cansetgps = false
+                end
             end
         end
-        Citizen.Wait(sleep)
-    end
-end)
-
-Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(0)
-        if cansetgps then
-            if IsControlJustReleased(0, Config.SetGPSKey) then
-                SetWaypointOff() 
-                SetNewWaypoint(pointx, pointy)
-                SendNUIMessage({
-                    action = 'RemoveDispatch'
-                })
-                cansetgps = false
+    end)
+    
+    function IsWeaponBlackListed(Player)
+        for k, v in pairs(Config.BlackListedWeapons) do
+            local weapon = GetHashKey(Config.BlackListedWeapons[k])
+            if GetSelectedPedWeapon(Player) == weapon then
+                return true
             end
         end
+        Citizen.Wait(10)
+        return false
     end
-end)
-
-function IsWeaponBlackListed(Player)
-    for k, v in pairs(Config.BlackListedWeapons) do
-        local weapon = GetHashKey(Config.BlackListedWeapons[k])
-        if GetSelectedPedWeapon(Player) == weapon then
-            return true
+    
+    function WeaponHasSuppressor(Player)
+        for k, v in pairs(Config.SupressorModels) do
+            if HasPedGotWeaponComponent(Player, GetSelectedPedWeapon(Player, v)) then
+                return true
+            end
+        end
+        Citizen.Wait(10)
+        return false
+    end
+    
+    function GetVehicleColorName(vehicle)
+        local vehicleColor1, vehicleColor2 = GetVehicleColor(vehicle)
+        local color1 = Config.Colors[tostring(vehicleColor1)]
+        local color2 = Config.Colors[tostring(vehicleColor2)]
+    
+        if color1 then
+            return color1
+        elseif color2 then
+            return color2
+        else
+            return "Unknown"
         end
     end
-    Citizen.Wait(10)
-    return false
+    
+    RegisterNUICallback('SendDispatchToTargetPlayer', function(data, cb)
+        TriggerServerEvent('real-dispatch:Server:SendDispatchToTargetPlayer', data)
+    end)
+    
+    RegisterNUICallback('CloseUI', function()
+        TriggerServerEvent('real-dispatch:Active', false)
+        SetNuiFocus(false, false)
+    end)
+elseif Config.DispatchType == 'normal' then
 end
-
-function WeaponHasSuppressor(Player)
-    for k, v in pairs(Config.SupressorModels) do
-        if HasPedGotWeaponComponent(Player, GetSelectedPedWeapon(Player, v)) then
-            return true
-        end
-    end
-    Citizen.Wait(10)
-    return false
-end
-
-function GetVehicleColorName(vehicle)
-    local vehicleColor1, vehicleColor2 = GetVehicleColor(vehicle)
-    local color1 = Config.Colors[tostring(vehicleColor1)]
-    local color2 = Config.Colors[tostring(vehicleColor2)]
-
-    if color1 then
-        return color1
-    elseif color2 then
-        return color2
-    else
-        return "Unknown"
-    end
-end
-
-RegisterNUICallback('SendDispatchToTargetPlayer', function(data, cb)
-    TriggerServerEvent('real-dispatch:Server:SendDispatchToTargetPlayer', data)
-end)
-
-RegisterNUICallback('CloseUI', function()
-    TriggerServerEvent('real-dispatch:Active', false)
-    SetNuiFocus(false, false)
-end)

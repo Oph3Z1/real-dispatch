@@ -15,7 +15,6 @@ const app = Vue.createApp({
         players: [],
         SelectedDispatch: null,
         SelectedD: null,
-        SelectedDData: null,
         map: null,
         mapMarkers: null, 
         dispatchPing: null,
@@ -98,7 +97,9 @@ const app = Vue.createApp({
 
         dispatchMap(type, playersData, coordsx, coordsy) {
             if (type == 'normal') {
-                const markers = L.markerClusterGroup();
+                const markers = L.markerClusterGroup({
+                    maxClusterRadius: 5
+                });
         
                 const newMarkers = [];
             
@@ -122,7 +123,7 @@ const app = Vue.createApp({
                         });
             
                         newMarker.on('click', () => {
-                            if (this.SelectedD != null || this.SelectedD != false) {
+                            if (this.SelectedD >= 0) {
                                 postNUI('SendDispatchToTargetPlayer', {
                                     tableid: this.SelectedD + 1,
                                     player: playerId,
@@ -137,6 +138,21 @@ const app = Vue.createApp({
                                     plate: this.selectedplate ,
                                     weapon: this.selectedweapon,
                                 })
+
+                                setTimeout(() => {
+                                    this.SelectedDispatch = null
+                                    this.SelectedD = null
+                                    this.selectedcrime = null
+                                    this.selectedtime = null
+                                    this.selectedloc = null
+                                    this.selectedgender = null
+                                    this.selectedvehiclestatus = null
+                                    this.selectedvehiclecolor = null
+                                    this.selectedplate = null
+                                    this.selectedweapon = null
+                                    this.selectedcoords = null
+                                    this.selectedinfo = null
+                                }, 1000)
                             }
                         });
             
@@ -164,6 +180,18 @@ const app = Vue.createApp({
                 this.map.remove()
                 this.map = null
             }
+            this.SelectedDispatch = null
+            this.SelectedD = null
+            this.selectedcrime = null
+            this.selectedtime = null
+            this.selectedloc = null
+            this.selectedgender = null
+            this.selectedvehiclestatus = null
+            this.selectedvehiclecolor = null
+            this.selectedplate = null
+            this.selectedweapon = null
+            this.selectedcoords = null
+            this.selectedinfo = null
             postNUI('CloseUI')
         },
 
@@ -215,7 +243,10 @@ const app = Vue.createApp({
                     this.dispatchMap('gecici', null, data.coordsx, data.coordsy)
                     this.Dispatches = data.data
                 } else if (data.type == 'remove') {
-                    this.Dispatches = data.data
+                    this.Dispatches = {}
+                    setTimeout(() => {
+                        this.Dispatches = data.data
+                    }, 10)
                 }
             }
 
