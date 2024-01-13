@@ -4,14 +4,18 @@ const store = Vuex.createStore({
     actions: {}
 });
 
+let audioPlayer = null;
+
 const app = Vue.createApp({
     data: () => ({
         Show: false,
         SendedDispatchStatus: false,
+        normaldispatch: true,
         Dispatches: [
             // {id: 1, crime: 'Shooting!', time: '10:28 AM', info: {location: 'Alta Street', gender: 'Male', weapon: 'Pistol', vehiclestatus: 'On foot', plate: 'None', vehiclecolor: 'None'}, claimed: true},
             // {id: 2, crime: 'Shooting!', time: '10:32 AM', info: {location: 'Capital Boulevard', gender: 'Female', weapon: 'AK-47', vehiclestatus: 'Sultan RS', plate: 'ABC3122', vehiclecolor: 'Red'}, claimed: false}
         ],
+        NormalDispatches: [],
         players: [],
         SelectedDispatch: null,
         SelectedD: null,
@@ -98,7 +102,7 @@ const app = Vue.createApp({
         dispatchMap(type, playersData, coordsx, coordsy) {
             if (type == 'normal') {
                 const markers = L.markerClusterGroup({
-                    maxClusterRadius: 5
+                    maxClusterRadius: 3
                 });
         
                 const newMarkers = [];
@@ -288,6 +292,39 @@ const app = Vue.createApp({
                 this.selectedplate = null
                 this.selectedweapon = null
             }
+
+            if (data.action == 'SendNormalDispatch') {
+                this.NormalDispatches = data.data
+                const sanane = data.data[0]
+                const info = sanane.info
+                this.selectedloc = info.location
+                this.selectedgender = info.gender
+                this.selectedvehiclestatus = info.vehiclestatus
+                this.selectedvehiclecolor = info.vehiclecolor
+                this.selectedplate = info.plate
+                this.selectedweapon = info.weapon
+                SoundPlayer("dispatch.ogg")
+                setTimeout(() => {
+
+                    const element = document.getElementById('dispatchisteamk');
+
+                    if (element) {
+                      element.classList.add('kapanis-dispatch');
+                    }
+
+                    setTimeout(() => {
+                        element.classList.remove('kapanis-dispatch');
+                        postNUI('RmoveTableNormalDispatch')
+                        this.NormalDispatches = {}
+                        this.selectedloc = null
+                        this.selectedgender = null
+                        this.selectedvehiclestatus = null
+                        this.selectedvehiclecolor = null
+                        this.selectedplate = null
+                        this.selectedweapon = null
+                    }, 1200)
+                }, 10000)
+            }
         });
 
         window.addEventListener('keydown', (event) => {
@@ -323,3 +360,12 @@ window.postNUI = async (name, data) => {
         // console.log(error)
     }
 };
+
+function SoundPlayer(val) {
+    let audioPath = `./sounds/${val}`;
+    audioPlayer = new Howl({
+        src: [audioPath]
+    });
+    audioPlayer.volume(0.6);
+    audioPlayer.play();
+}

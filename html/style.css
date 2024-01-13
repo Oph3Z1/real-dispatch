@@ -127,3 +127,29 @@ margin-left: 6px;
     opacity: 1;
   }
 }
+
+.normal-dispatch {
+  animation: acilisAnimasyonu 1.2s ease-in-out;
+}
+
+@keyframes acilisAnimasyonu {
+  0% {
+      transform: translateX(100%);
+  }
+  100% {
+      transform: translateX(0);
+  }
+}
+
+.kapanis-dispatch {
+  animation: kapanisAnimasyonu 1.2s ease-in-out;
+}
+
+@keyframes kapanisAnimasyonu {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}

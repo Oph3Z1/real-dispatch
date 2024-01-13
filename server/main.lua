@@ -280,4 +280,37 @@ if Config.DispatchType == 'advanced' then
         end
     end)
 elseif Config.DispatchType == 'normal' then
+    RegisterNetEvent('real-dispatch:SendNormalDispatch', function(table, coords, job)
+        local Allplayers = GetPlayers()
+
+        for k, v in ipairs(Allplayers) do
+            local player = tonumber(v)
+            if Config.Framework == 'newqb' or Config.Framework == 'oldqb' then
+                local xPlayer = frameworkObject.Functions.GetPlayer(player)
+                for a, b in pairs(job) do
+                    if xPlayer.PlayerData.job.name == b then
+                        TriggerClientEvent('real-dispatch:SendNormalDispatchToClient', player, table, coords)
+                        TriggerClientEvent('real-dispatch:AddBlipToMap', player, coords)
+                    end
+                end
+            else
+                local Player = frameworkObject.GetPlayerFromId(v)
+                for a, b in pairs(job) do
+                    if Player.job.name == b then
+                        TriggerClientEvent('real-dispatch:SendNormalDispatchToClient', player, table, coords)
+                        TriggerClientEvent('real-dispatch:AddBlipToMap', player, coords)
+                    end
+                end
+            end
+        end
+    end)
+
+    RegisterNetEvent('real-dispatch:RemoveNormalDispatchTable', function()
+        local Allplayers = GetPlayers()
+
+        for k, v in ipairs(Allplayers) do
+            local player = tonumber(v)
+            TriggerClientEvent('real-dispatch:Client:RmoveNormalDispatchTable', player)
+        end
+    end)
 end

@@ -1,24 +1,26 @@
 function StartDispatchSystem()
     if Config.DrawText == 'qb-target' then
-        for _,v in pairs(Config.DispatchSystemCoords) do
-            exports['qb-target']:AddBoxZone("real-dispatch" .. _, vector3(v.Coords.x, v.Coords.y, v.Coords.z), 1.5, 1.5, {
-                name = "real-dispatch" .. _,
-                debugPoly = false,
-                heading = -20,
-                minZ = v.Coords.z - 2,
-                maxZ = v.Coords.z + 2,
-            }, {
-                options = {
-                    {
-                        type = "client",
-                        event = "real-dispatch:StartDispatchSystem",
-                        icon = "fas fa-hand-point-up",
-                        label = "Open Dispatch",
-                        
+        if playerinjobu == 'police' then
+            for _,v in pairs(Config.DispatchSystemCoords) do
+                exports['qb-target']:AddBoxZone("real-dispatch" .. _, vector3(v.Coords.x, v.Coords.y, v.Coords.z), 1.5, 1.5, {
+                    name = "real-dispatch" .. _,
+                    debugPoly = false,
+                    heading = -20,
+                    minZ = v.Coords.z - 2,
+                    maxZ = v.Coords.z + 2,
+                }, {
+                    options = {
+                        {
+                            type = "client",
+                            event = "real-dispatch:StartDispatchSystem",
+                            icon = "fas fa-hand-point-up",
+                            label = "Open Dispatch",
+                            
+                        },
                     },
-                },
-                distance = 8
-            })
+                    distance = 8
+                })
+            end
         end
     elseif Config.DrawText == 'drawtext' then
         Citizen.CreateThread(function()
@@ -32,9 +34,11 @@ function StartDispatchSystem()
                     if Distance < 1.5 then
                         sleep = 4
                         Config.DrawText3D("~INPUT_PICKUP~ - Open Dispatch", vector3(v.Coords.x, v.Coords.y, v.Coords.z))
-                        if IsControlJustReleased(0, 38) then
-                            TriggerServerEvent('real-dispatch:Active', true)
-                            TriggerServerEvent('real-dispatch:GetDispatchDataFromServer')
+                        if playerinjobu == 'police' then
+                            if IsControlJustReleased(0, 38) then
+                                TriggerServerEvent('real-dispatch:Active', true)
+                                TriggerServerEvent('real-dispatch:GetDispatchDataFromServer')
+                            end
                         end
                     end
                 end

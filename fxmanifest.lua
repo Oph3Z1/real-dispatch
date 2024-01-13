@@ -14,6 +14,7 @@ files {
     'html/img/*.png',
     'html/img/*.jpg',
     'html/fonts/*.otf',
+    'html/sounds/*.ogg'
 }
 
 shared_script{

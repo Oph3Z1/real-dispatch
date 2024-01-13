@@ -1,15 +1,26 @@
 Config = {}
 
 Config.Framework = 'newqb' -- newqb, oldqb, newesx, oldesx, autodetect
-Config.DispatchType = 'advanced' -- advanced, normal
+Config.DispatchType = 'normal' -- advanced, normal
 Config.DrawText = 'qb-target' -- drawtext, qb-target
 
 Config.SuppressorControl = true
 Config.SetGPSKey = 246 -- https://docs.fivem.net/docs/game-references/controls/
-Config.UpdateLocationTime = 1 -- in second
+Config.UpdateLocationTime = 1 -- Seconds | Leaflet map
 
 Config.DispatchSystemCoords = {
-    {Coords = vector3(441.27777099609, -981.68426513672, 30.689504623413)},
+    {Coords = vector3(441.16009521484, -978.85528564453, 30.689601898193)},
+}
+
+Config.Cooldown = {
+    Shooting = 60 -- Seconds
+}
+Config.BlipRemoveTime = 15 -- Seconds
+Config.BlipSettings = {
+    Sprite = 1,
+    Color = 1,
+    Name = 'Alert',
+    Size = 1.0
 }
 
 Config.BlackListedWeapons = {
