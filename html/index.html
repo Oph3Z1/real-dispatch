@@ -25,11 +25,11 @@
 <body>
     <div id="app">
         <div class="w-full h-[100vh] left-0 top-0 absolute">
-            <div v-if="Show" class="w-full h-full flex flex-col left-0 top-0 absolute" style="background-image: url('./img/background.png'); background-size: 100% 100%;">
+            <div v-if="Show" class="w-full h-full flex flex-col left-0 top-0 absolute z-10" style="background-image: url('./img/background.png'); background-size: 100% 100%;">
                 <div class="w-full h-[10%] top-0 left-0 absolute"></div>
                 <div class="w-full h-[4%] flex flex-wrap top-[10%] left-0 absolute">
                     <div class="w-[50%] h-full flex items-center justify-center">
-                        <span class="header-text">LSPD DISPATCH SYSTEM</span>
+                        <span class="header-text">{{ Language['lspd_dispatch_system'] }}</span>
                     </div>
                     <div class="w-[50%] h-full flex items-center justify-end">
                         <div class="w-[40%] h-[80%] flex items-center justify-center"></div>
@@ -50,7 +50,7 @@
                             <div class="w-full flex items-center justify-start" :class="{'h-[33.3333333%]': SelectedDispatch == k, 'h-full': SelectedDispatch != k}">
                                 <span class="crime-text" style="margin-left: 1vw;">22-30</span>
                                 <span class="crime-text" style="margin-left: 1vw;">{{ v.crime }}</span>
-                                <span class="crime-status-text" v-if="SelectedDispatch != k">New</span>
+                                <span class="crime-status-text" v-if="SelectedDispatch != k">{{ Language['new'] }}</span>
                             </div>
                             <div class="w-full h-[66.6666667%] flex flex-wrap" v-if="SelectedDispatch == k">
                                 <div class="w-[33.3333333%] h-full flex flex-col">
@@ -89,7 +89,7 @@
                                 </div>
                                 <div class="w-[30%] h-full flex flex-col items-center justify-center">
                                     <span class="time-text ml-[1.3vw]">{{ v.time }}</span>
-                                    <div class="w-[70%] h-[35%] flex items-center justify-center bg-[#202124] border-[.1vw] border-[#3D3E40] my-[.7vw] hover:cursor-pointer" @click="SendDispatchToTargetPlayer(k, v.player, v.crime, v.time, v.info, v.coords, v.info.location, v.info.gender, v.info.vehiclestatus, v.info.vehiclecolor, v.info.plate, v.info.weapon)"> <span class="select-text" v-if="SelectedD != k">Select</span> <span class="select-text" v-if="SelectedD == k">Selected</span> </div>
+                                    <div class="w-[70%] h-[35%] flex items-center justify-center bg-[#202124] border-[.1vw] border-[#3D3E40] my-[.7vw] hover:cursor-pointer" @click="SendDispatchToTargetPlayer(k, v.player, v.crime, v.time, v.info, v.coords, v.info.location, v.info.gender, v.info.vehiclestatus, v.info.vehiclecolor, v.info.plate, v.info.weapon)"> <span class="select-text" v-if="SelectedD != k">{{ Language['select'] }}</span> <span class="select-text" v-if="SelectedD == k">{{ Language['selected'] }}</span> </div>
                                 </div>
                             </div>
                         </div>
@@ -101,8 +101,8 @@
                 <div class="w-full h-[18%] flex flex-col bg-[#16181D] mb-[.8vw] right-[0] dispatch-animation">
                     <div class="w-full h-[33.3333333%] flex items-center justify-start">
                         <span class="crime-text" style="margin-left: 1vw;">22-30</span>
-                        <span class="crime-text" style="margin-left: 1vw;">Shooting!</span>
-                        <span class="crime-text" style="margin-left: 7vw;">Sent from station!</span>
+                        <span class="crime-text" style="margin-left: 1vw;">{{ Language['shooting'] }}</span>
+                        <span class="crime-text" style="margin-left: 7vw;">{{ Language['sent_from_station'] }}</span>
                     </div>
                     <div class="w-full h-[66.6666667%] flex flex-wrap">
                         <div class="w-[33.3333333%] h-full flex flex-col">
@@ -141,16 +141,16 @@
                         </div>
                         <div class="w-[30%] h-full flex flex-col items-center justify-center">
                             <span class="time-text ml-[1.3vw]">{{ selectedtime }}</span>
-                            <div class="w-[70%] h-[35%] flex items-center justify-center bg-[#202124] border-[.1vw] border-[#3D3E40] hover:cursor-pointer my-[.7vw]"> <span class="select-text">Y Set GPS</span> </div>
+                            <div class="w-[70%] h-[35%] flex items-center justify-center bg-[#202124] border-[.1vw] border-[#3D3E40] hover:cursor-pointer my-[.7vw]"> <span class="select-text">{{ Language['set_gps'] }}</span> </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="w-[18%] h-[75%] block overflow-x-hidden overflow-y-auto top-[3vw] right-[1vw] absolute -z-1">
+            <div class="w-[18%] h-[75%] block overflow-x-hidden overflow-y-auto top-[3vw] right-[1vw] absolute -z-1" v-if="dispatchtype">
                 <div id="dispatchisteamk" class="w-full h-[18%] flex flex-col bg-[#16181D] mb-[.8vw] right-[0] normal-dispatch" v-for="(v, k) in NormalDispatches">
                     <div class="w-full h-[33.3333333%] flex items-center justify-start">
                         <span class="crime-text" style="margin-left: 1vw;">22-30</span>
-                        <span class="crime-text" style="margin-left: 1vw;">Shooting!</span>
+                        <span class="crime-text" style="margin-left: 1vw;">{{ Language['shooting'] }}</span>
                     </div>
                     <div class="w-full h-[66.6666667%] flex flex-wrap">
                         <div class="w-[33.3333333%] h-full flex flex-col">
@@ -189,7 +189,7 @@
                         </div>
                         <div class="w-[30%] h-full flex flex-col items-center justify-center">
                             <span class="time-text ml-[1.3vw]">{{ selectedtime }}</span>
-                            <div class="w-[70%] h-[35%] flex items-center justify-center bg-[#202124] border-[.1vw] border-[#3D3E40] hover:cursor-pointer my-[.7vw]"> <span class="select-text">Y Set GPS</span> </div>
+                            <div class="w-[70%] h-[35%] flex items-center justify-center bg-[#202124] border-[.1vw] border-[#3D3E40] hover:cursor-pointer my-[.7vw]"> <span class="select-text">{{ Language['set_gps'] }}</span> </div>
                         </div>
                     </div>
                 </div>

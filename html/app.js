@@ -32,7 +32,8 @@ const app = Vue.createApp({
         selectedplate: null,
         selectedweapon: null,
         selectedcoords: null,
-        
+        Language: '',
+        dispatchtype: false
     }),
 
     methods: {         
@@ -229,6 +230,15 @@ const app = Vue.createApp({
     mounted() { 
         window.addEventListener("message", event => {
             const data = event.data;
+
+            if (data.action == 'setup') {
+                this.Language = data.language
+                if (data.dispatchtype == 'advanced') {
+                    this.dispatchtype = false
+                } else if (data.dispatchtype == 'normal') {
+                    this.dispatchtype = true
+                }
+            }
             
             if (data.action == 'OpenUI') {
                 this.Show = true

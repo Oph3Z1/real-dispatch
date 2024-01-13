@@ -18,6 +18,12 @@ Citizen.CreateThread(function()
         Citizen.Wait(0)
     end
     Citizen.Wait(1500)
+    SendNUIMessage({
+        action = 'setup',
+        language = Config.Language,
+        dispatchtype = Config.DispatchType
+    })
+    Citizen.Wait(1500)
     StartDispatchSystem()
 end)
 
@@ -134,15 +140,15 @@ if Config.DispatchType == 'advanced' then
                         if Config.Framework == 'newqb' or Config.Framework == 'oldqb' then
                             local Player = frameworkObject.Functions.GetPlayerData()
                             if Player.charinfo.gender == 1 then
-                                gender = 'Female'
+                                gender = Config.Language['female']
                             else
-                                gender = 'Male'
+                                gender = Config.Language['male']
                             end
                         else
                             if PlayerData.esx == 1 then
-                                gender = 'Female'
+                                gender = Config.Language['female']
                             else
-                                gender = 'Male'
+                                gender = Config.Language['male']
                             end
                         end
         
@@ -151,15 +157,15 @@ if Config.DispatchType == 'advanced' then
                             vehicleplate = GetVehicleNumberPlateText(vehicle)
                             vehiclecolor = GetVehicleColorName(vehicle)
                         else
-                            vehiclestatus = 'On foot'
-                            vehicleplate = 'None'
-                            vehiclecolor = 'None'
+                            vehiclestatus = Config.Language['onfoot']
+                            vehicleplate = Config.Language['none']
+                            vehiclecolor = Config.Language['none']
                         end
         
                         if not reportedPlayers[playeridfalanisteamksananeorospu] then
                             table.insert(tablefalan, {
                                 player = playeridfalanisteamksananeorospu,
-                                crime = 'Shooting!',
+                                crime = Config.Language['shooting'],
                                 time = '',
                                 info = {
                                     location = street,
@@ -182,7 +188,7 @@ if Config.DispatchType == 'advanced' then
                                         table.remove(tablefalan, k)
                                         table.insert(tablefalan, {
                                             player = playeridfalanisteamksananeorospu,
-                                            crime = 'Shooting!',
+                                            crime = Config.Language['shooting'],
                                             time = '',
                                             info = {
                                                 location = street,
@@ -203,7 +209,6 @@ if Config.DispatchType == 'advanced' then
                             AddDispatch(tablefalan, coords.x, coords.y)
                             reportedPlayers[playeridfalanisteamksananeorospu] = true
                         end
-                        
                     end
                 end
             end
@@ -235,6 +240,57 @@ if Config.DispatchType == 'advanced' then
         TriggerServerEvent('real-dispatch:Active', false)
         SetNuiFocus(false, false)
     end)
+
+    exports('AddDispatch', function(crime, street, gender, weapon, vehiclestatus, vehicleplate, vehiclecolor, coords)
+        local playeridfalanisteamksananeorospu = GetPlayerServerId(PlayerId())
+        if not reportedPlayers[playeridfalanisteamksananeorospu] then
+            table.insert(tablefalan, {
+                player = playeridfalanisteamksananeorospu,
+                crime = crime,
+                time = '',
+                info = {
+                    location = street,
+                    gender = gender,
+                    weapon = weapon,
+                    vehiclestatus = vehiclestatus,
+                    plate = vehicleplate,
+                    vehiclecolor = vehiclecolor,
+                },
+                claimed = false,
+                expireTime = 0,
+                coords = coords
+            })
+            AddDispatch(tablefalan, coords.x, coords.y)
+            reportedPlayers[playeridfalanisteamksananeorospu] = true
+        else
+            for k, v in pairs(tablefalan) do
+                if v.player == playeridfalanisteamksananeorospu then
+                    if v.info.location ~= street or v.info.weapon ~= weapon or v.info.vehiclestatus ~= vehiclestatus or v.info.plate ~= vehicleplate or v.info.vehiclecolor ~= vehiclecolor then
+                        table.remove(tablefalan, k)
+                        table.insert(tablefalan, {
+                            player = playeridfalanisteamksananeorospu,
+                            crime = crime,
+                            time = '',
+                            info = {
+                                location = street,
+                                gender = gender,
+                                weapon = weapon,
+                                vehiclestatus = vehiclestatus,
+                                plate = vehicleplate,
+                                vehiclecolor = vehiclecolor,
+                            },
+                            claimed = false,
+                            expireTime = 0,
+                            coords = coords
+                        })
+                        break
+                    end
+                end
+            end
+            AddDispatch(tablefalan, coords.x, coords.y)
+            reportedPlayers[playeridfalanisteamksananeorospu] = true
+        end
+    end)
 elseif Config.DispatchType == 'normal' then
     Citizen.CreateThread(function()
         while true do
@@ -265,15 +321,15 @@ elseif Config.DispatchType == 'normal' then
                         if Config.Framework == 'newqb' or Config.Framework == 'oldqb' then
                             local Player = frameworkObject.Functions.GetPlayerData()
                             if Player.charinfo.gender == 1 then
-                                gender = 'Female'
+                                gender = Config.Language['female']
                             else
-                                gender = 'Male'
+                                gender = Config.Language['male']
                             end
                         else
                             if PlayerData.esx == 1 then
-                                gender = 'Female'
+                                gender = Config.Language['female']
                             else
-                                gender = 'Male'
+                                gender = Config.Language['male']
                             end
                         end
         
@@ -282,14 +338,14 @@ elseif Config.DispatchType == 'normal' then
                             vehicleplate = GetVehicleNumberPlateText(vehicle)
                             vehiclecolor = GetVehicleColorName(vehicle)
                         else
-                            vehiclestatus = 'On foot'
-                            vehicleplate = 'None'
-                            vehiclecolor = 'None'
+                            vehiclestatus = Config.Language['onfoot']
+                            vehicleplate = Config.Language['none']
+                            vehiclecolor = Config.Language['none']
                         end
 
                         table.insert(tablefalan, {
                             player = playeridfalanisteamksananeorospu,
-                            crime = 'Shooting!',
+                            crime = Config.Language['shooting'],
                             time = '',
                             info = {
                                 location = street,
@@ -367,6 +423,30 @@ elseif Config.DispatchType == 'normal' then
             Config.BlipRemoveTime
         })
     end)
+
+    exports('AddNormalDispatch', function(player, crime, street, gender, weapon, vehiclestatus, vehicleplate, vehiclecolor, coords, job)
+        if Bekleamk.shooting == 0 then
+            table.insert(tablefalan, {
+                player = player,
+                crime = crime,
+                time = '',
+                info = {
+                    location = street,
+                    gender = gender,
+                    weapon = weapon,
+                    vehiclestatus = vehiclestatus,
+                    plate = vehicleplate,
+                    vehiclecolor = vehiclecolor,
+                },
+                coords = coords
+            })
+            if not job then
+                job = {'police'}
+            end
+            AddNormalDispatch(tablefalan, coords, job)
+            Bekleamk.shooting = Config.Cooldown.Shooting
+        end
+    end)
 end
 
 function IsWeaponBlackListed(Player)
@@ -400,6 +480,6 @@ function GetVehicleColorName(vehicle)
     elseif color2 then
         return color2
     else
-        return "Unknown"
+        return Config.Language['unknown']
     end
 end
