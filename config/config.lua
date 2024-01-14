@@ -17,11 +17,11 @@ Config.Cooldown = {
 }
 
 Config.BlipRemoveTime = 15 -- Seconds
-Config.BlipSettings = {
-    Sprite = 1,
-    Color = 1,
-    Name = 'Alert',
-    Size = 1.0
+Config.BlipSettings = { -- https://docs.fivem.net/docs/game-references/blips/
+    Sprite = 1, -- Marker type
+    Color = 1, -- Color
+    Name = 'Alert', -- Name
+    Size = 1.0 -- Size
 }
 
 Config.Language = {
