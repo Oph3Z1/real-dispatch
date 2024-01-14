@@ -4,7 +4,7 @@ Config.Framework = 'newqb' -- newqb, oldqb, newesx, oldesx, autodetect
 Config.DispatchType = 'advanced' -- advanced, normal
 Config.DrawText = 'qb-target' -- drawtext, qb-target
 
-Config.SuppressorControl = true
+Config.SuppressorControl = true -- If true, it checks for silencers on weapons and if there is a silencer, no notification is sent.
 Config.SetGPSKey = 246 -- https://docs.fivem.net/docs/game-references/controls/
 Config.UpdateLocationTime = 1 -- Seconds | Leaflet map (The more seconds, the more optimized it works.)
 
