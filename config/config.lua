@@ -15,6 +15,7 @@ Config.DispatchSystemCoords = {
 Config.Cooldown = {
     Shooting = 60 -- Seconds
 }
+
 Config.BlipRemoveTime = 15 -- Seconds
 Config.BlipSettings = {
     Sprite = 1,
