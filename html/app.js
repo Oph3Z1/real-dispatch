@@ -33,7 +33,8 @@ const app = Vue.createApp({
         selectedweapon: null,
         selectedcoords: null,
         Language: '',
-        dispatchtype: false
+        dispatchtype: false,
+        gecicimarker: null,
     }),
 
     methods: {         
@@ -128,37 +129,7 @@ const app = Vue.createApp({
                         });
             
                         newMarker.on('click', () => {
-                            if (this.SelectedD >= 0) {
-                                postNUI('SendDispatchToTargetPlayer', {
-                                    tableid: this.SelectedD + 1,
-                                    player: playerId,
-                                    crime: this.selectedcrime,
-                                    time: this.selectedtime,
-                                    info: this.selectedinfo,
-                                    coords: this.selectedcoords,
-                                    loc: this.selectedloc,
-                                    gender: this.selectedgender ,
-                                    vehstatus: this.selectedvehiclestatus,
-                                    vehcolor: this.selectedvehiclecolor ,
-                                    plate: this.selectedplate ,
-                                    weapon: this.selectedweapon,
-                                })
-
-                                setTimeout(() => {
-                                    this.SelectedDispatch = null
-                                    this.SelectedD = null
-                                    this.selectedcrime = null
-                                    this.selectedtime = null
-                                    this.selectedloc = null
-                                    this.selectedgender = null
-                                    this.selectedvehiclestatus = null
-                                    this.selectedvehiclecolor = null
-                                    this.selectedplate = null
-                                    this.selectedweapon = null
-                                    this.selectedcoords = null
-                                    this.selectedinfo = null
-                                }, 1000)
-                            }
+                            this.SendDispatchAQ(playerId)
                         });
             
                         newMarkers.push(newMarker);
@@ -167,14 +138,15 @@ const app = Vue.createApp({
                 });
                 markers.addLayers(newMarkers);
                 this.map.addLayer(markers);
-            } else {
+            } else if (type == 'gecici') {
                 const newMarker = L.marker([coordsy, coordsx], { icon: this.seconddispatchPing });
-    
+                this.gecicimarker = newMarker
+
                 this.mapMarkers.addLayer(newMarker);
-    
-                setTimeout(() => {
-                    this.mapMarkers.removeLayer(newMarker);
-                }, 15000);
+            } else if (type == 'removegecici') {
+                if (this.gecicimarker !== null) {
+                    this.mapMarkers.removeLayer(this.gecicimarker);
+                }
             }
         },        
         
@@ -201,17 +173,70 @@ const app = Vue.createApp({
         },
 
         SendDispatchToTargetPlayer(k, player, crime, time, info, coords, loc, gender, vehstatus, vehcolor, plate, weapon) {
-            this.SelectedD = k
-            this.selectedcrime = crime
-            this.selectedtime = time
-            this.selectedinfo = info
-            this.selectedcoords = coords
-            this.selectedloc = loc
-            this.selectedgender = gender
-            this.selectedvehiclestatus = vehstatus
-            this.selectedvehiclecolor = vehcolor
-            this.selectedplate = plate
-            this.selectedweapon = weapon
+            if (this.SelectedD === null || this.SelectedD === false) {
+                this.SelectedD = k
+                this.selectedcrime = crime
+                this.selectedtime = time
+                this.selectedinfo = info
+                this.selectedcoords = coords
+                this.selectedloc = loc
+                this.selectedgender = gender
+                this.selectedvehiclestatus = vehstatus
+                this.selectedvehiclecolor = vehcolor
+                this.selectedplate = plate
+                this.selectedweapon = weapon
+                this.dispatchMap('gecici', null, coords.x, coords.y)
+            } else {
+                this.SelectedD = null
+                this.selectedcrime = null
+                this.selectedtime = null
+                this.selectedinfo = null
+                this.selectedcoords = null
+                this.selectedloc = null
+                this.selectedgender = null
+                this.selectedvehiclestatus = null
+                this.selectedvehiclecolor = null
+                this.selectedplate = null
+                this.selectedweapon = null
+                this.dispatchMap('removegecici', null, null, null)
+                this.gecicimarker = null
+            }
+        },
+
+        SendDispatchAQ(playerId) {
+            if (this.SelectedD >= 0 && this.SelectedD !== null && this.SelectedD !== false) {
+                postNUI('SendDispatchToTargetPlayer', {
+                    tableid: this.SelectedD + 1,
+                    player: playerId,
+                    crime: this.selectedcrime,
+                    time: this.selectedtime,
+                    info: this.selectedinfo,
+                    coords: this.selectedcoords,
+                    loc: this.selectedloc,
+                    gender: this.selectedgender ,
+                    vehstatus: this.selectedvehiclestatus,
+                    vehcolor: this.selectedvehiclecolor ,
+                    plate: this.selectedplate ,
+                    weapon: this.selectedweapon,
+                })
+
+                setTimeout(() => {
+                    this.SelectedDispatch = null
+                    this.SelectedD = null
+                    this.selectedcrime = null
+                    this.selectedtime = null
+                    this.selectedloc = null
+                    this.selectedgender = null
+                    this.selectedvehiclestatus = null
+                    this.selectedvehiclecolor = null
+                    this.selectedplate = null
+                    this.selectedweapon = null
+                    this.selectedcoords = null
+                    this.selectedinfo = null
+                    this.dispatchMap('removegecici', null, null, null)
+                    this.gecicimarker = null
+                }, 1000)
+            }
         },
     },
 
@@ -254,7 +279,6 @@ const app = Vue.createApp({
 
             if (data.action == 'AddDispatch') {
                 if (data.type == 'normal') {
-                    this.dispatchMap('gecici', null, data.coordsx, data.coordsy)
                     this.Dispatches = data.data
                 } else if (data.type == 'remove') {
                     this.Dispatches = {}
@@ -301,6 +325,8 @@ const app = Vue.createApp({
                 this.selectedvehiclecolor = null
                 this.selectedplate = null
                 this.selectedweapon = null
+                this.dispatchMap('removegecici', null, null, null)
+                this.gecicimarker = null
             }
 
             if (data.action == 'SendNormalDispatch') {

@@ -11,6 +11,8 @@ tableid = nil
 playerindatasiamk = {}
 playerinjobu = ""
 Bekleamk = {shooting = 0}
+loadedqb = false
+loadedesx = false
 
 Citizen.CreateThread(function()
     frameworkObject, Config.Framework = GetCore()
@@ -27,13 +29,26 @@ Citizen.CreateThread(function()
     StartDispatchSystem()
 end)
 
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
+    loadedqb = true
+end)
+
+RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
+    loadedqb = false
+end)
+
+RegisterNetEvent('esx:playerLoaded')
+AddEventHandler('esx:playerLoaded', function(xPlayer, isNew, skin)
+    loadedesx = true
+end)
+
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(1000)
-        if Config.Framework == 'newqb' or Config.Framework == 'oldqb' then
+        if loadedqb then
             playerindatasiamk = frameworkObject.Functions.GetPlayerData()
             playerinjobu = playerindatasiamk.job.name
-        else
+        elseif loadedesx then
             playerindatasiamk = frameworkObject.GetPlayerData()
             playerinjobu = playerindatasiamk.job.name
         end
@@ -44,7 +59,6 @@ Citizen.CreateThread(function()
                     Bekleamk[k] = Bekleamk[k] - 1
                 end
             end
-
             for a, b in pairs(blipiste) do
                 if b[2] > 0 then
                     b[2] = b[2] - 1
@@ -58,7 +72,6 @@ Citizen.CreateThread(function()
 end)
 
 if Config.DispatchType == 'advanced' then
-
     RegisterNetEvent('real-dispatch:StartDispatchSystem', function()
         TriggerServerEvent('real-dispatch:Active', true)
         TriggerServerEvent('real-dispatch:GetDispatchDataFromServer')
