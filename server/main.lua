@@ -149,36 +149,6 @@ if Config.DispatchType == 'advanced' then
             end
         end)
     end
-
-    Citizen.CreateThread(function()
-        while true do
-            Citizen.Wait(1000)
-            local Players = frameworkObject.Functions.GetPlayers()
-    
-            for k, v in pairs(Players) do
-                local player = frameworkObject.Functions.GetPlayer(v)
-                local isAlreadyInTable = false 
-    
-                for a, b in ipairs(Polices) do
-                    if b.id == v then
-                        isAlreadyInTable = true
-                        break
-                    end
-                end
-    
-                if player.PlayerData.job.name == 'police' and not isAlreadyInTable then
-                    local playername = player.PlayerData.charinfo.firstname .. ' ' .. player.PlayerData.charinfo.lastname
-                    local coords = GetEntityCoords(GetPlayerPed(v))
-                    table.insert(Polices, {
-                        id = v,
-                        name = playername,
-                        coordsx = coords.x,
-                        coordsy = coords.y
-                    })
-                end
-            end
-        end
-    end)
     
     RegisterNetEvent('real-dispatch:AddDispatchToServer', function(table, coordsx, coordsy)
         local src = source
